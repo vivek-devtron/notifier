@@ -1,0 +1,17 @@
+template: |
+      {
+          "text": "{{text}}",
+          "username": "{{userName}}",
+          "icon_url": "{{iconUrl}}",
+          "attachments": [{
+              "fallback": "pipeline triggerd",
+              "color": "#36a64f",
+              "title": "devtron cd alerts",
+              "title_link": "http://devtron.ai",
+              "text": "optional text",
+              "fields": [],
+              "footer": "devtron boat footer",
+              "footer_icon": "string",
+              "ts": 123456789
+          }]
+      }

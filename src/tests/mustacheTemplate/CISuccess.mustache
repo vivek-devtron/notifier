@@ -1,0 +1,71 @@
+{
+  "text": ":tada: Build pipeline Successful |  {{#ciMaterials}} Branch > {{branch}} {{/ciMaterials}} | Application > {{appName}}",
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "\n"
+      }
+    },
+    {
+      "type": "divider"
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": ":tada: *Build Pipeline successful*\n{{eventTime}} \n Triggered by {{triggeredBy}}"
+      },
+      "accessory": {
+        "type": "image",
+        "image_url": "https://devtron.ai/wp-content/uploads/2020/06/img-build-notification@2x.png",
+        "alt_text": "calendar thumbnail"
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+          "text": "*Application*\n{{appName}}"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Pipeline*\n{{pipelineName}}"
+        }
+      ]
+    },
+    {{#ciMaterials}}
+     {
+      "type": "section",
+      "fields": [
+        {
+          "type": "mrkdwn",
+           "text": "*Branch*\n`{{appName}}/{{branch}}`"
+        },
+        {
+          "type": "mrkdwn",
+          "text": "*Commit*\n<{{& commitLink}}|{{commit}}>"
+        }
+      ]
+    },
+    {{/ciMaterials}}
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Details"
+          }
+          {{#buildHistoryLink}}
+            ,
+            "url": "{{& buildHistoryLink}}"
+          {{/buildHistoryLink}}
+        }
+      ]
+    }
+  ]
+}

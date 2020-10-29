@@ -1,0 +1,42 @@
+{
+    "eventTypeId": 2,
+    "eventName": "",
+    "pipelineId": 32,
+    "pipelineType": "CD",
+    "correlationId": "1bfb4b38-764a-49a3-8334-f44e2c1ef540",
+    "payload": {
+        "appName": "viki-app-9",
+        "envName": "dev",
+        "pipelineName": "viki-app-9-cd-1",
+        "source": "",
+        "dockerImageUrl": "",
+        "triggeredBy": "",
+        "stage": "POST",
+        "deploymentHistoryLink": "http://demo.devtron.info:32080/dashboard/app/47/cd-details/824785820232/824785820152/212/source-code",
+        "appDetailLink": "http://demo.devtron.info:32080/dashboard/app/47/details/824785820232/pod",
+        "downloadLink": "http://demo.devtron.info:32080/orchestrator/app/cd-pipeline/workflow/download/47/824785820232/824785820152/212",
+        "buildHistoryLink": "",
+        "material": {
+            "gitTriggers": {
+                "35": {
+                    "Commit": "54619992d645400a24b87e2084d12f023118daa5",
+                    "Author": "Anushka <anushka@devtron.ai>",
+                    "Date": "2020-06-11T17:25:24+05:30",
+                    "Message": "chnge in cmd\n",
+                    "Changes": [
+                        "Dockerfile",
+                        "package.json"
+                    ]
+                }
+            },
+            "ciMaterials": null
+        }
+    },
+    "eventTime": "2020-06-14T06:15:25Z",
+    "teamId": 1,
+    "appId": 47,
+    "envId": 2,
+    "cdWorkflowType": "POST",
+    "cdWorkflowRunnerId": 212,
+    "ciArtifactId": 167
+}

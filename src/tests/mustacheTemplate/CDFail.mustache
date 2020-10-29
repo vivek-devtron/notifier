@@ -1,0 +1,91 @@
+{   
+    "text": ":x: Deployment pipeline Failed |  {{#ciMaterials}} Branch > {{branch}} {{/ciMaterials}} | Application > {{appName}}",
+    "blocks": [{
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "\n"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": ":x: *Deployment Pipeline failed on {{envName}}*\n{{eventTime}} \n by {{triggeredBy}}"
+            },
+            "accessory": {
+                "type": "image",
+                "image_url":"https://devtron.ai/wp-content/uploads/2020/06/img-deployment-notification@2x.png",
+                "alt_text": "calendar thumbnail"
+            }
+        },
+        {
+            "type": "divider"
+        },
+        {
+            "type": "section",
+            "fields": [{
+                    "type": "mrkdwn",
+                    "text": "*Application*\n{{appName}}\n*Pipeline*\n{{pipelineName}}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": "*Environment*\n{{envName}}\n*Stage*\n{{stage}}"
+                }
+            ]
+        },
+        {{#ciMaterials}}
+        {
+        "type": "section",
+        "fields": [
+            {
+            "type": "mrkdwn",
+            "text": "*Branch*\n`{{appName}}/{{branch}}`"
+            },
+            {
+            "type": "mrkdwn",
+            "text": "*Commit*\n<{{& commitLink}}|{{commit}}>"
+            }
+        ]
+        },
+        {{/ciMaterials}}
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "*Docker Image*\n`{{dockerImg}}`"
+            }
+        },
+        {
+            "type": "actions",
+            "elements": [{
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "View Pipeline",
+                        "emoji": true
+                    }
+                    {{#deploymentHistoryLink}} 
+                    ,
+                    "url": "{{& deploymentHistoryLink}}"
+                      {{/deploymentHistoryLink}}
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "App details",
+                        "emoji": true
+                    }
+                    {{#appDetailsLink}} 
+                    ,
+                    "url": "{{& appDetailsLink}}"
+                      {{/appDetailsLink}}
+                }
+            ]
+        }
+    ]
+}

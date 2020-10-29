@@ -1,0 +1,7 @@
+template: |
+      {
+          "from": "{{from}}",
+          "to": "{{to}}",
+          "subject": "{{subject}}",
+          "html": "{{}}"
+      }
