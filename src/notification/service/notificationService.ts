@@ -60,7 +60,8 @@ class NotificationService {
     }
 
     private isValidEvent(event: Event) {
-        if (event.eventTypeId && event.pipelineType && event.correlationId && event.payload)
+        this.logger.info("event for validate", event);
+        if (event.eventTypeId && event.pipelineType && event.correlationId && event.payload && event.baseUrl)
             return true;
         return false;
     }
@@ -76,6 +77,7 @@ class Event {
     appId: number
     envId: number
     teamId: number
+    baseUrl: string
 }
 
 export {NotificationService, Event}
