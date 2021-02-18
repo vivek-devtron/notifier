@@ -61,6 +61,7 @@ class NotificationService {
 
     private isValidEvent(event: Event) {
         this.logger.info("event for validate", event);
+        this.logger.info(event.baseUrl);
         if (event.eventTypeId && event.pipelineType && event.correlationId && event.payload && event.baseUrl)
             return true;
         return false;
