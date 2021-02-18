@@ -85,6 +85,7 @@ app.get('/test', (req, res) => {
 })
 app.post('/notify', (req, res) => {
     logger.info("notifications Received")
+    logger.info(req.body)
     notificationService.sendNotification(req.body)
     res.send('notifications sent')
 });
