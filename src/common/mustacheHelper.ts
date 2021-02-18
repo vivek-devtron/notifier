@@ -37,7 +37,7 @@ export class MustacheHelper {
     parseEvent(event: Event): ParsedCIEvent | ParsedCDEvent {
         let date = moment(event.eventTime);
         let timestamp = date.format("ddd DD MMM YYYY HH:mm a");
-        let baseURL = process.env['BASE_URL'];
+        let baseURL = event.baseUrl;
         let material = event.payload.material;
         let ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
             if (material && material.gitTriggers && material.gitTriggers[ci.id]) {
