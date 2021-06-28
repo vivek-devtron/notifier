@@ -42,11 +42,35 @@ export class MustacheHelper {
         let ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
             if (material && material.gitTriggers && material.gitTriggers[ci.id]) {
                 let trigger = material.gitTriggers[ci.id];
-                return {
-                    branch: ci.value || "NA",
-                    commit: trigger.Commit ? trigger.Commit.substring(0, 8) : "NA",
-                    commitLink: this.createGitCommitUrl(ci.url, trigger.Commit),
+                let _material;
+                if (ci.type == 'SOURCE_TYPE_PULL_REQUEST'){
+                    let _prData = trigger.prData;
+                    _material = {
+                        type : ci.type,
+                        prData : {
+                            prTitle : _prData.prTitle,
+                            prUrl: _prData.prUrl,
+                            sourceBranchName : _prData.sourceBranchName,
+                            sourceBranchHash : _prData.sourceBranchHash,
+                            sourceBranchCommitLink : this.createGitCommitUrl(ci.url, _prData.sourceBranchHash),
+                            targetBranchName : _prData.targetBranchName,
+                            targetBranchHash : _prData.targetBranchHash,
+                            targetBranchCommitLink : this.createGitCommitUrl(ci.url, _prData.targetBranchHash),
+                            authorName : _prData.authorName,
+                            lastCommitMessage : _prData.lastCommitMessage,
+                            prCreatedOn : _prData.prCreatedOn,
+                            prUpdatedOn : _prData.prUpdatedOn,
+                        }
+                    }
+                }else{
+                    _material = {
+                        branch: ci.value || "NA",
+                        commit: trigger.Commit ? trigger.Commit.substring(0, 8) : "NA",
+                        commitLink: this.createGitCommitUrl(ci.url, trigger.Commit),
+                        type : ci.type
+                    }
                 }
+                return _material;
             }
             else {
                 return {
@@ -102,8 +126,25 @@ interface ParsedCIEvent {
         branch: string;
         commit: string
         commitLink: string;
+        type: string;
+        prData: PrData;
     }[];
     buildHistoryLink: string;
+}
+
+class PrData {
+    prTitle : string;
+    prUrl: string;
+    sourceBranchName : string
+    sourceBranchHash : string
+    sourceBranchCommitLink : string
+    targetBranchName : string
+    targetBranchHash : string
+    targetBranchCommitLink : string
+    authorName : string
+    lastCommitMessage : string
+    prCreatedOn : string
+    prUpdatedOn : string
 }
 
 interface ParsedCDEvent {
