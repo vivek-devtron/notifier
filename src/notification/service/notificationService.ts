@@ -76,7 +76,7 @@ class Event {
     appId: number
     envId: number
     teamId: number
-    baseUrl: string
+    baseUrl?: string
 }
 
 export {NotificationService, Event}

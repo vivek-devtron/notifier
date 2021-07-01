@@ -1,5 +1,5 @@
 {
-    "eventTypeId": 2,
+    "eventTypeId": 1,
     "eventName": "",
     "pipelineId": 32,
     "pipelineType": "CD",
@@ -10,7 +10,7 @@
         "pipelineName": "viki-app-9-cd-1",
         "source": "",
         "dockerImageUrl": "",
-        "triggeredBy": "",
+        "triggeredBy": "rashmi@devtron.ai",
         "stage": "POST",
         "deploymentHistoryLink": "http://demo.devtron.info:32080/dashboard/app/47/cd-details/824785820232/824785820152/212/source-code",
         "appDetailLink": "http://demo.devtron.info:32080/dashboard/app/47/details/824785820232/pod",
@@ -18,18 +18,45 @@
         "buildHistoryLink": "",
         "material": {
             "gitTriggers": {
-                "35": {
-                    "Commit": "54619992d645400a24b87e2084d12f023118daa5",
-                    "Author": "Anushka <anushka@devtron.ai>",
-                    "Date": "2020-06-11T17:25:24+05:30",
-                    "Message": "chnge in cmd\n",
+                "72": {
+                    "Commit": "60a5ced6160d79fc9c04e06acb55ccad45b14e27",
+                    "Author": "Vikram Singh <vikram@devtron.ai>",
+                    "Date": "2021-02-18T09:38:27+05:30",
+                    "Message": "log\n",
                     "Changes": [
-                        "Dockerfile",
-                        "package.json"
-                    ]
+                        "src/notification/service/notificationService.ts"
+                    ],
+                    "prData": {
+                        "prTitle": "handling of PR data in notifier",
+                        "prUrl": "https://github.com/devtron-labs/notifier/pull/2/files",
+                        "sourceBranchName": "ci_pr_integration",
+                        "sourceBranchHash": "24e2e942057d1d5f0aed755eef0cc01421d8050e",
+                        "targetBranchName": "main",
+                        "targetBranchHash": "676ed6e25ab6d5a2bcdb058127ae802d8b68deca",
+                        "authorName": "rashmi@devtron.ai",
+                        "lastCommitMessage": "handling of PR data in notifier",
+                        "prCreatedOn": "2021-02-18T09:38:27+05:30",
+                        "prUpdatedOn": "2021-02-18T09:38:27+05:30"
+                    }
                 }
             },
-            "ciMaterials": null
+            "ciMaterials": [
+                {
+                    "id": 72,
+                    "gitMaterialId": 35,
+                    "gitMaterialUrl": "",
+                    "gitMaterialName": "notifier",
+                    "type": "SOURCE_TYPE_PULL_REQUEST",
+                    "value": "hosturl-changes",
+                    "active": true,
+                    "lastFetchTime": "0001-01-01T00:00:00Z",
+                    "isRepoError": false,
+                    "repoErrorMsg": "",
+                    "isBranchError": false,
+                    "branchErrorMsg": "",
+                    "url": "https://github.com/devtron-labs/notifier.git"
+                }
+            ]
         }
     },
     "eventTime": "2020-06-14T06:15:25Z",

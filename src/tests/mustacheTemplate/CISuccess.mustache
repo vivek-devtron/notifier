@@ -37,20 +37,46 @@
       ]
     },
     {{#ciMaterials}}
-     {
-      "type": "section",
-      "fields": [
+        {{^prData.prUrl}}
         {
-          "type": "mrkdwn",
-           "text": "*Branch*\n`{{appName}}/{{branch}}`"
+        "type": "section",
+        "fields": [
+            {
+            "type": "mrkdwn",
+            "text": "*Branch*\n`{{appName}}/{{branch}}`"
+            },
+            {
+            "type": "mrkdwn",
+            "text": "*Commit*\n<{{& commitLink}}|{{commit}}>"
+            }
+        ]
+        },
+        {{/prData.prUrl}}
+        {{#prData.prUrl}}
+        {
+        "type": "section",
+        "fields": [
+            {
+            "type": "mrkdwn",
+            "text": "*Pull Request*\n<{{& prData.prUrl}}|{{prData.prTitle}}>"
+            }
+        ]
         },
         {
-          "type": "mrkdwn",
-          "text": "*Commit*\n<{{& commitLink}}|{{commit}}>"
-        }
-      ]
-    },
-    {{/ciMaterials}}
+        "type": "section",
+        "fields": [
+            {
+            "type": "mrkdwn",
+            "text": "*Source*\n`{{appName}}/{{prData.sourceBranchName}}`"
+            },
+             {
+            "type": "mrkdwn",
+            "text": "*Target*\n`{{appName}}/{{prData.targetBranchName}}`"
+            }
+        ]
+        },
+        {{/prData.prUrl}}
+        {{/ciMaterials}}
     {
       "type": "actions",
       "elements": [
