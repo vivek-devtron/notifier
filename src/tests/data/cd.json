@@ -46,7 +46,7 @@
                     "gitMaterialId": 35,
                     "gitMaterialUrl": "",
                     "gitMaterialName": "notifier",
-                    "type": "SOURCE_TYPE_PULL_REQUEST",
+                    "type": "WEBHOOK",
                     "value": "hosturl-changes",
                     "active": true,
                     "lastFetchTime": "0001-01-01T00:00:00Z",
