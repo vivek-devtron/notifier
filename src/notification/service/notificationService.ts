@@ -26,6 +26,9 @@ class NotificationService {
     }
 
     public sendNotification(event: Event) {
+
+        this.logger.info("event payload " , event);
+
         if (!this.isValidEvent(event)) {
             return
         }
