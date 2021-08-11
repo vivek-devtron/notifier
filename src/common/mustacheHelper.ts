@@ -44,12 +44,12 @@ export class MustacheHelper {
                 let trigger = material.gitTriggers[ci.id];
                 let _material;
                 if (ci.type == 'WEBHOOK'){
-                    let _webhookData = trigger.webhookData;
+                    let _webhookData = trigger.WebhookData;
                     _material = {
                         type : ci.type,
                         webhookData : {
-                            eventActionType : _webhookData.eventActionType,
-                            data: _webhookData.data
+                            eventActionType : _webhookData.EventActionType,
+                            data: _webhookData.Data
                         }
                     }
                 }else{
