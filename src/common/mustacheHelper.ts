@@ -44,20 +44,25 @@ export class MustacheHelper {
                 let trigger = material.gitTriggers[ci.id];
                 let _material;
                 if (ci.type == 'WEBHOOK'){
-                    let _webhookData = trigger.WebhookData;
+                    let _webhookDataInRequest = trigger.WebhookData;
+                    let _isMergedTypeWebhook = _webhookDataInRequest.EventActionType == 'merged';
+                    if (_isMergedTypeWebhook){
+                        _webhookDataInRequest.Data = this.modifyWebhookDataForMergedType(_webhookDataInRequest.Data, ci.url)
+                    }
+                    let _webhookData : WebhookData = {
+                        mergedType : _isMergedTypeWebhook,
+                        data: _webhookDataInRequest.Data
+                    }
                     _material = {
-                        type : ci.type,
-                        webhookData : {
-                            eventActionType : _webhookData.EventActionType,
-                            data: _webhookData.Data
-                        }
+                        webhookType : true,
+                        webhookData: _webhookData
                     }
                 }else{
                     _material = {
                         branch: ci.value || "NA",
                         commit: trigger.Commit ? trigger.Commit.substring(0, 8) : "NA",
                         commitLink: this.createGitCommitUrl(ci.url, trigger.Commit),
-                        type : ci.type
+                        webhookType : false,
                     }
                 }
                 return _material;
@@ -104,6 +109,28 @@ export class MustacheHelper {
             }
         }
     }
+
+    modifyWebhookDataForMergedType (webhookDataMap: any, gitUrl : string) : any {
+        // set target checkout link
+        let _targetCheckout = webhookDataMap["target checkout"];
+        if (_targetCheckout){
+            webhookDataMap["target checkout link"] = this.createGitCommitUrl(gitUrl, _targetCheckout)
+            webhookDataMap["target checkout"] = _targetCheckout.substring(0, 8);
+        }else{
+            webhookDataMap["target checkout"] = "NA";
+        }
+
+        // set source checkout link
+        let _sourceCheckout = webhookDataMap["source checkout"];
+        if (_sourceCheckout){
+            webhookDataMap["source checkout link"] = this.createGitCommitUrl(gitUrl, _sourceCheckout)
+            webhookDataMap["source checkout"] = _sourceCheckout.substring(0, 8);
+        }else{
+            webhookDataMap["source checkout"] = "NA";
+        }
+
+        return webhookDataMap
+    }
 }
 
 //For Slack
@@ -116,15 +143,10 @@ interface ParsedCIEvent {
         branch: string;
         commit: string
         commitLink: string;
-        type: string;
+        isWebhookType: boolean;
         webhookData: WebhookData;
     }[];
     buildHistoryLink: string;
-}
-
-class WebhookData {
-    eventActionType : string;   // merged/non-merged
-    data: Map<string, string>;
 }
 
 interface ParsedCDEvent {
@@ -138,8 +160,15 @@ interface ParsedCDEvent {
         branch: string;
         commit: string
         commitLink: string;
+        webhookType: boolean;
+        webhookData: WebhookData;
     }[];
     appDetailsLink: string;
     deploymentHistoryLink: string;
     dockerImg: string;
+}
+
+class WebhookData {
+    mergedType : boolean;   // merged/non-merged
+    data: Map<string, string>;
 }
