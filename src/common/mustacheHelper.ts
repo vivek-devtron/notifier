@@ -46,12 +46,9 @@ export class MustacheHelper {
                 if (ci.type == 'WEBHOOK'){
                     let _webhookDataInRequest = trigger.WebhookData;
                     let _isMergedTypeWebhook = _webhookDataInRequest.EventActionType == 'merged';
-                    if (_isMergedTypeWebhook){
-                        _webhookDataInRequest.Data = this.modifyWebhookDataForMergedType(_webhookDataInRequest.Data, ci.url)
-                    }
                     let _webhookData : WebhookData = {
                         mergedType : _isMergedTypeWebhook,
-                        data: _webhookDataInRequest.Data
+                        data: this.modifyWebhookData(_webhookDataInRequest.Data, ci.url, _isMergedTypeWebhook)
                     }
                     _material = {
                         webhookType : true,
@@ -110,26 +107,37 @@ export class MustacheHelper {
         }
     }
 
-    modifyWebhookDataForMergedType (webhookDataMap: any, gitUrl : string) : any {
-        // set target checkout link
-        let _targetCheckout = webhookDataMap["target checkout"];
-        if (_targetCheckout){
-            webhookDataMap["target checkout link"] = this.createGitCommitUrl(gitUrl, _targetCheckout)
-            webhookDataMap["target checkout"] = _targetCheckout.substring(0, 8);
-        }else{
-            webhookDataMap["target checkout"] = "NA";
+    modifyWebhookData (webhookDataMap: any, gitUrl : string, isMergedTypeWebhook : boolean) : any {
+
+        if(isMergedTypeWebhook){
+            // set target checkout link
+            let _targetCheckout = webhookDataMap["target checkout"];
+            if (_targetCheckout){
+                webhookDataMap["target checkout link"] = this.createGitCommitUrl(gitUrl, _targetCheckout)
+                webhookDataMap["target checkout"] = _targetCheckout.substring(0, 8);
+            }else{
+                webhookDataMap["target checkout"] = "NA";
+            }
+
+            // set source checkout link
+            let _sourceCheckout = webhookDataMap["source checkout"];
+            if (_sourceCheckout){
+                webhookDataMap["source checkout link"] = this.createGitCommitUrl(gitUrl, _sourceCheckout)
+                webhookDataMap["source checkout"] = _sourceCheckout.substring(0, 8);
+            }else{
+                webhookDataMap["source checkout"] = "NA";
+            }
         }
 
-        // set source checkout link
-        let _sourceCheckout = webhookDataMap["source checkout"];
-        if (_sourceCheckout){
-            webhookDataMap["source checkout link"] = this.createGitCommitUrl(gitUrl, _sourceCheckout)
-            webhookDataMap["source checkout"] = _sourceCheckout.substring(0, 8);
-        }else{
-            webhookDataMap["source checkout"] = "NA";
-        }
+        // removing space from all keys of data map , as rendering issue with space in key in mustashe template
+        let _modifiedDataMap = {};
+        Object.keys(webhookDataMap).forEach((_key) => {
+            let _modifiedKey = _key.replace(/\s/g, '');
+            _modifiedDataMap[_modifiedKey] = webhookDataMap[_key];
+        })
 
-        return webhookDataMap
+        return _modifiedDataMap;
+
     }
 }
 
