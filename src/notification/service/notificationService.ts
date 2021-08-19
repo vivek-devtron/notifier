@@ -26,6 +26,7 @@ class NotificationService {
     }
 
     public sendNotification(event: Event) {
+
         if (!this.isValidEvent(event)) {
             return
         }
@@ -76,7 +77,7 @@ class Event {
     appId: number
     envId: number
     teamId: number
-    baseUrl: string
+    baseUrl?: string
 }
 
 export {NotificationService, Event}

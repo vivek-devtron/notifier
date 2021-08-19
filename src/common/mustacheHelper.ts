@@ -42,11 +42,27 @@ export class MustacheHelper {
         let ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
             if (material && material.gitTriggers && material.gitTriggers[ci.id]) {
                 let trigger = material.gitTriggers[ci.id];
-                return {
-                    branch: ci.value || "NA",
-                    commit: trigger.Commit ? trigger.Commit.substring(0, 8) : "NA",
-                    commitLink: this.createGitCommitUrl(ci.url, trigger.Commit),
+                let _material;
+                if (ci.type == 'WEBHOOK'){
+                    let _webhookDataInRequest = trigger.WebhookData;
+                    let _isMergedTypeWebhook = _webhookDataInRequest.EventActionType == 'merged';
+                    let _webhookData : WebhookData = {
+                        mergedType : _isMergedTypeWebhook,
+                        data: this.modifyWebhookData(_webhookDataInRequest.Data, ci.url, _isMergedTypeWebhook)
+                    }
+                    _material = {
+                        webhookType : true,
+                        webhookData: _webhookData
+                    }
+                }else{
+                    _material = {
+                        branch: ci.value || "NA",
+                        commit: trigger.Commit ? trigger.Commit.substring(0, 8) : "NA",
+                        commitLink: this.createGitCommitUrl(ci.url, trigger.Commit),
+                        webhookType : false,
+                    }
                 }
+                return _material;
             }
             else {
                 return {
@@ -90,6 +106,39 @@ export class MustacheHelper {
             }
         }
     }
+
+    modifyWebhookData (webhookDataMap: any, gitUrl : string, isMergedTypeWebhook : boolean) : any {
+
+        if(isMergedTypeWebhook){
+            // set target checkout link
+            let _targetCheckout = webhookDataMap["target checkout"];
+            if (_targetCheckout){
+                webhookDataMap["target checkout link"] = this.createGitCommitUrl(gitUrl, _targetCheckout)
+                webhookDataMap["target checkout"] = _targetCheckout.substring(0, 8);
+            }else{
+                webhookDataMap["target checkout"] = "NA";
+            }
+
+            // set source checkout link
+            let _sourceCheckout = webhookDataMap["source checkout"];
+            if (_sourceCheckout){
+                webhookDataMap["source checkout link"] = this.createGitCommitUrl(gitUrl, _sourceCheckout)
+                webhookDataMap["source checkout"] = _sourceCheckout.substring(0, 8);
+            }else{
+                webhookDataMap["source checkout"] = "NA";
+            }
+        }
+
+        // removing space from all keys of data map , as rendering issue with space in key in mustashe template
+        let _modifiedDataMap = {};
+        Object.keys(webhookDataMap).forEach((_key) => {
+            let _modifiedKey = _key.replace(/\s/g, '');
+            _modifiedDataMap[_modifiedKey] = webhookDataMap[_key];
+        })
+
+        return _modifiedDataMap;
+
+    }
 }
 
 //For Slack
@@ -102,6 +151,8 @@ interface ParsedCIEvent {
         branch: string;
         commit: string
         commitLink: string;
+        isWebhookType: boolean;
+        webhookData: WebhookData;
     }[];
     buildHistoryLink: string;
 }
@@ -117,8 +168,15 @@ interface ParsedCDEvent {
         branch: string;
         commit: string
         commitLink: string;
+        webhookType: boolean;
+        webhookData: WebhookData;
     }[];
     appDetailsLink: string;
     deploymentHistoryLink: string;
     dockerImg: string;
+}
+
+class WebhookData {
+    mergedType : boolean;   // merged/non-merged
+    data: Map<string, string>;
 }
