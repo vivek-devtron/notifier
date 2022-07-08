@@ -5,6 +5,7 @@ import { ConnectionOptions, createConnection, getConnectionOptions } from "typeo
 import { NotificationSettingsRepository } from "./repository/notificationSettingsRepository"
 import { SlackService } from './destination/destinationHandlers/slackHandler'
 import { SESService } from './destination/destinationHandlers/sesHandler'
+import { SMTPService } from './destination/destinationHandlers/smtpHandler'
 import { EventLogRepository } from './repository/notifierEventLogRepository'
 import { EventLogBuilder } from './common/eventLogBuilder'
 import { EventRepository } from './repository/eventsRepository'
@@ -17,6 +18,8 @@ import { SlackConfig } from "./entities/slackConfig";
 import * as winston from 'winston';
 import { SesConfig } from "./entities/sesConfig";
 import { SESConfigRepository } from "./repository/sesConfigRepository";
+import { SMTPConfig } from "./entities/smtpConfig";
+import { SMTPConfigRepository } from "./repository/smtpConfigRepository";
 import { UsersRepository } from './repository/usersRepository';
 import { Users } from "./entities/users";
 import { send } from './tests/sendSlackNotification';
@@ -40,14 +43,17 @@ let eventLogRepository: EventLogRepository = new EventLogRepository()
 let eventLogBuilder: EventLogBuilder = new EventLogBuilder()
 let slackConfigRepository: SlackConfigRepository = new SlackConfigRepository()
 let sesConfigRepository: SESConfigRepository = new SESConfigRepository()
+let smtpConfigRepository: SMTPConfigRepository = new SMTPConfigRepository()
 let usersRepository: UsersRepository = new UsersRepository()
 let mustacheHelper: MustacheHelper = new MustacheHelper()
 let slackService = new SlackService(eventLogRepository, eventLogBuilder, slackConfigRepository, logger, mustacheHelper)
 let sesService = new SESService(eventLogRepository, eventLogBuilder, sesConfigRepository, usersRepository, logger)
+let smtpService = new SMTPService(eventLogRepository, eventLogBuilder, smtpConfigRepository, usersRepository, logger)
 
 let handlers: Handler[] = []
 handlers.push(slackService)
 handlers.push(sesService)
+handlers.push(smtpService)
 
 let notificationService = new NotificationService(new EventRepository(), new NotificationSettingsRepository(), new NotificationTemplatesRepository(), handlers, logger)
 
@@ -68,7 +74,7 @@ let dbOptions: ConnectionOptions = {
     username: user,
     password: pwd,
     database: db,
-    entities: [NotificationSettings, NotifierEventLog, Event, NotificationTemplates, SlackConfig, SesConfig, Users]
+    entities: [NotificationSettings, NotifierEventLog, Event, NotificationTemplates, SlackConfig, SesConfig, SMTPConfig, Users]
 }
 
 createConnection(dbOptions).then(async connection => {
