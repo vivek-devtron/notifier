@@ -13,7 +13,7 @@ export class SMTPConfig {
     host: string;
 
     @Column()
-    authType: string;
+    auth_type: string;
 
     @Column()
     auth_user: string;

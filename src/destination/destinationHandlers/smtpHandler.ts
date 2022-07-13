@@ -27,7 +27,7 @@ export class SMTPService implements Handler {
 
     handle(event: Event, templates: NotificationTemplates[], setting: NotificationSettings, configsMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean {
         let smtpTemplate: NotificationTemplates = templates.find(t => {
-            return 'smtp' == t.channel_type
+            return 'ses' == t.channel_type
         })
         if (!smtpTemplate) {
             this.logger.info("no smtp template")
@@ -74,9 +74,8 @@ export class SMTPService implements Handler {
                            port: config['port'],
                            host: config['host'],
                            auth:{
-                            type: config['authType'],
-                            username: config['user_name'],
-                            password: config['password'],
+                            user: config['auth_user'],
+                            pass: config['auth_password'],
                            }
                         }]
                     }
@@ -111,16 +110,17 @@ export class SMTPService implements Handler {
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
             let json = Mustache.render(JSON.stringify(template), event.payload)
-            json = JSON.parse(json)
+            const jsonObj = JSON.parse(JSON.parse(json))
             const res = await sdk.send(
                 {
-                    email: json
+                    email: jsonObj
                 }
             );
+            this.logger.info('sendNotification2')
             return res;
         } catch (error) {
-            this.logger.error('SMTP sendNotification error', error)
-            throw new Error('Unable to send SMTP notification');
+          this.logger.error('SMTP sendNotification error', error)
+          throw new Error('Unable to send SMTP notification');
         }
     }
 
