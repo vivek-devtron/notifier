@@ -107,13 +107,18 @@ export class SESService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
+
+          this.logger.info('Notification send event payload')
+          this.logger.info(JSON.stringify(event.payload))
             let json = Mustache.render(template, event.payload)
-            json = JSON.parse(json)
             const res = await sdk.send(
                 {
-                    email: json
+                    email: JSON.parse(json)
                 }
             );
+
+            this.logger.info('Notification send')
+            this.logger.info(json)
             return res;
         } catch (error) {
             this.logger.error('ses sendNotification error', error)
