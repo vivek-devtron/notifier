@@ -8,7 +8,7 @@ export class SMTPConfigRepository {
     }
 
     findDefaultSMTPConfig() {
-        return getManager().getRepository(SMTPConfig).findOne({where: {default: true}});
+        return getManager().getRepository(SMTPConfig).findOne({where: {default: true, deleted: false}});
     }
 
 }

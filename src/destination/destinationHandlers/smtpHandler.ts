@@ -109,14 +109,12 @@ export class SMTPService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-            let json = Mustache.render(JSON.stringify(template), event.payload)
-            const jsonObj = JSON.parse(JSON.parse(json))
+            let json = Mustache.render(template, event.payload)
             const res = await sdk.send(
                 {
-                    email: jsonObj
+                    email: JSON.parse(json)
                 }
             );
-            this.logger.info('sendNotification2')
             return res;
         } catch (error) {
           this.logger.error('SMTP sendNotification error', error)
