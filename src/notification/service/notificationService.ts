@@ -33,7 +33,6 @@ class NotificationService {
 
         this.notificationSettingsRepository.findByEventSource(event.pipelineType, event.pipelineId, event.eventTypeId, event.appId, event.envId, event.teamId).then((settingsResults) => {
           this.logger.info('notificationSettingsRepository.findByEventSource')
-          this.logger.info(JSON.stringify(event))
           if (!settingsResults || settingsResults.length == 0) {
                 this.logger.info("no notification settings found for event " + event.correlationId);
                 return
