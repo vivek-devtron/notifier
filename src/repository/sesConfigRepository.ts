@@ -1,5 +1,4 @@
 import {getManager} from "typeorm";
-import {SlackConfig} from "../entities/slackConfig";
 import {SesConfig} from "../entities/sesConfig";
 
 export class SESConfigRepository {
@@ -9,7 +8,7 @@ export class SESConfigRepository {
     }
 
     findDefaultSESConfig() {
-        return getManager().getRepository(SesConfig).findOne({where: {default: true}});
+        return getManager().getRepository(SesConfig).findOne({where: {default: true, deleted: true}});
     }
 
 }
