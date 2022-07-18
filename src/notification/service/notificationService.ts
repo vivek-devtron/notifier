@@ -32,12 +32,16 @@ class NotificationService {
         }
 
         this.notificationSettingsRepository.findByEventSource(event.pipelineType, event.pipelineId, event.eventTypeId, event.appId, event.envId, event.teamId).then((settingsResults) => {
-            if (!settingsResults || settingsResults.length == 0) {
+          this.logger.info('notificationSettingsRepository.findByEventSource')
+          this.logger.info(JSON.stringify(event))
+          if (!settingsResults || settingsResults.length == 0) {
                 this.logger.info("no notification settings found for event " + event.correlationId);
                 return
             }
             let destinationMap = new Map();
             let configsMap = new Map();
+            this.logger.info("notification settings " );
+            this.logger.info(JSON.stringify(settingsResults))
             settingsResults.forEach((setting) => {
                 const providerObjects = setting.config
                 const providersSet = new Set(providerObjects);
