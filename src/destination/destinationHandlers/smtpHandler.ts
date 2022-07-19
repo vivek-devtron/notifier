@@ -44,7 +44,7 @@ export class SMTPService implements Handler {
         const providersSet = new Set(providerObjects);
         this.smtpConfig = null
         for (const element of providersSet) {
-          if (element['dest'] === "ses") {
+          if (element['dest'] === "smtp") {
             this.getDefaultConfig(providersSet, event, sesTemplate, setting, destinationMap, configsMap)
             break
           }
@@ -64,7 +64,7 @@ export class SMTPService implements Handler {
         }
         if(this.smtpConfig && this.smtpConfig.from_email){
           providersSet.forEach(p => {
-            if (p['dest'] == "ses") {
+            if (p['dest'] == "smtp") {
                 let userId = p['configId']
                 let configKey = p['dest'] + '-' + userId
                 if (!configsMap.get(configKey)) {
