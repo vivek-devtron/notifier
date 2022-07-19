@@ -32,4 +32,7 @@ export class SMTPConfig {
 
     @Column()
     default: string;
+
+    @Column()
+    deleted: boolean;
 }

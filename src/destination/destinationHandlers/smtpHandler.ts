@@ -16,6 +16,13 @@ export class SMTPService implements Handler {
     smtpConfigRepository: SMTPConfigRepository
     usersRepository: UsersRepository
     logger: any
+    smtpConfig: {
+      port: string
+      host: string
+      auth_user: string
+      auth_password: string
+      from_email: string
+    }
 
     constructor(eventLogRepository: EventLogRepository, eventLogBuilder: EventLogBuilder, smtpConfigRepository: SMTPConfigRepository, usersRepository: UsersRepository, logger: any) {
         this.eventLogRepository = eventLogRepository
@@ -26,27 +33,92 @@ export class SMTPService implements Handler {
     }
 
     handle(event: Event, templates: NotificationTemplates[], setting: NotificationSettings, configsMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean {
-        let smtpTemplate: NotificationTemplates = templates.find(t => {
+        let sesTemplate: NotificationTemplates = templates.find(t => {
             return 'ses' == t.channel_type
         })
-        if (!smtpTemplate) {
+        if (!sesTemplate) {
             this.logger.info("no smtp template")
             return
         }
         const providerObjects = setting.config
         const providersSet = new Set(providerObjects);
+        this.smtpConfig = null
+        for (const element of providersSet) {
+          if (element['dest'] === "smtp") {
+            this.getDefaultConfig(providersSet, event, sesTemplate, setting, destinationMap, configsMap)
+            break
+          }
+        }
+        return true
+    }
 
-        providersSet.forEach(p => {
+    private async getDefaultConfig(providersSet, event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, emailMap: Map<string, boolean>, configsMap: Map<string, boolean> ){
+      try {
+        const config = await this.smtpConfigRepository.findDefaultSMTPConfig()
+        this.smtpConfig = {
+          port: config['port'],
+          host: config['host'],
+          auth_user: config['auth_user'],
+          auth_password: config['auth_password'],
+          from_email: config['from_email']
+        }
+        if(this.smtpConfig && this.smtpConfig.from_email){
+          providersSet.forEach(p => {
             if (p['dest'] == "smtp") {
                 let userId = p['configId']
                 let configKey = p['dest'] + '-' + userId
                 if (!configsMap.get(configKey)) {
-                    this.processNotification(userId, event, smtpTemplate, setting, p, destinationMap)
+                    this.processNotification(userId, event, sesTemplate, setting, p, emailMap)
                     configsMap.set(configKey, true)
                 }
             }
         });
-        return true
+      }
+      } catch (error) {
+        this.logger.error('getDefaultConfig', error)
+        throw new Error('Unable to get default SMTP config');
+      }
+    }
+
+    private preparePaylodAndSend(event: Event, smtpTemplate: NotificationTemplates, setting: NotificationSettings, p: string){
+          let sdk: NotifmeSdk = new NotifmeSdk({
+                channels: {
+                    email: {
+                        providers: [{
+                           type: 'smtp',
+                           port: this.smtpConfig['port'],
+                           host: this.smtpConfig['host'],
+                           auth:{
+                            user: this.smtpConfig['auth_user'],
+                            pass: this.smtpConfig['auth_password'],
+                           }
+                        }]
+                    }
+                }
+            });
+          event.payload['fromEmail'] = this.smtpConfig['from_email']
+          let engine = new Engine();
+          // let options = { allowUndefinedFacts: true }
+          let conditions: string = p['rule']['conditions'];
+
+          if (conditions) {
+              engine.addRule({conditions: conditions, event: event});
+              engine.run(event).then(e => {
+                  this.sendNotification(event, sdk, smtpTemplate.template_payload).then(result => {
+                      this.saveNotificationEventSuccessLog(result, event, p, setting);
+                  }).catch((error) => {
+                      this.logger.error(error.message);
+                      this.saveNotificationEventFailureLog(event, p, setting);
+                  });
+              })
+          } else {
+              this.sendNotification(event, sdk, smtpTemplate.template_payload).then(result => {
+                  this.saveNotificationEventSuccessLog(result, event, p, setting);
+              }).catch((error) => {
+                  this.logger.error(error.message);
+                  this.saveNotificationEventFailureLog(event, p, setting);
+              });
+          }
     }
 
     private processNotification(userId: number, event: Event, smtpTemplate: NotificationTemplates, setting: NotificationSettings, p: string, emailMap: Map<string, boolean>) {
@@ -59,64 +131,24 @@ export class SMTPService implements Handler {
             if (!emailMap.get(user['email_id'])) {
                 emailMap.set(user['email_id'], true)
                 event.payload['toEmail'] = user['email_id']
+                this.preparePaylodAndSend(event, smtpTemplate, setting, p)
             } else {
                 this.logger.info('duplicate email filtered out')
                 return
-            }
-        })
-
-        this.smtpConfigRepository.findDefaultSMTPConfig().then(config => {
-            let sdk: NotifmeSdk = new NotifmeSdk({
-                channels: {
-                    email: {
-                        providers: [{
-                           type: 'smtp',
-                           port: config['port'],
-                           host: config['host'],
-                           auth:{
-                            user: config['auth_user'],
-                            pass: config['auth_password'],
-                           }
-                        }]
-                    }
-                }
-            });
-
-            event.payload['fromEmail'] = config['from_email']
-            let engine = new Engine();
-            // let options = { allowUndefinedFacts: true }
-            let conditions: string = p['rule']['conditions'];
-            if (conditions) {
-                engine.addRule({conditions: conditions, event: event});
-                engine.run(event).then(e => {
-                    this.sendNotification(event, sdk, smtpTemplate.template_payload).then(result => {
-                        this.saveNotificationEventSuccessLog(result, event, p, setting);
-                    }).catch((error) => {
-                        this.logger.error(error.message);
-                        this.saveNotificationEventFailureLog(event, p, setting);
-                    });
-                })
-            } else {
-                this.sendNotification(event, sdk, smtpTemplate.template_payload).then(result => {
-                    this.saveNotificationEventSuccessLog(result, event, p, setting);
-                }).catch((error) => {
-                    this.logger.error(error.message);
-                    this.saveNotificationEventFailureLog(event, p, setting);
-                });
             }
         })
     }
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-            let json = Mustache.render(JSON.stringify(template), event.payload)
-            const jsonObj = JSON.parse(JSON.parse(json))
+            let json = Mustache.render(template, event.payload)
             const res = await sdk.send(
                 {
-                    email: jsonObj
+                    email: JSON.parse(json)
                 }
             );
-            this.logger.info('sendNotification2')
+            this.logger.info('Notification send')
+            this.logger.info(json)
             return res;
         } catch (error) {
           this.logger.error('SMTP sendNotification error', error)

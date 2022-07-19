@@ -17,7 +17,12 @@ export class SESService implements Handler {
     sesConfigRepository: SESConfigRepository
     usersRepository: UsersRepository
     logger: any
-
+    sesConfig: {
+      region: string
+      access_key: string
+      secret_access_key: string
+      from_email: string
+    }
     constructor(eventLogRepository: EventLogRepository, eventLogBuilder: EventLogBuilder, sesConfigRepository: SESConfigRepository, usersRepository: UsersRepository, logger: any) {
         this.eventLogRepository = eventLogRepository
         this.eventLogBuilder = eventLogBuilder
@@ -36,18 +41,80 @@ export class SESService implements Handler {
         }
         const providerObjects = setting.config
         const providersSet = new Set(providerObjects);
+        this.sesConfig = null
+        for (const element of providersSet) {
+          if (element['dest'] === "ses") {
+            this.getDefaultConfig(providersSet, event, sesTemplate, setting, destinationMap, configsMap)
+            break
+          }
+        }
+        return true
+    }
 
-        providersSet.forEach(p => {
+    private async getDefaultConfig(providersSet, event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, emailMap: Map<string, boolean>, configsMap: Map<string, boolean> ){
+      try {
+        const config = await this.sesConfigRepository.findDefaultSESConfig()
+        this.sesConfig = {
+          region: config['region'],
+          access_key: config['access_key'],
+          secret_access_key: config['secret_access_key'],
+          from_email: config['from_email']
+        }
+        if(this.sesConfig && this.sesConfig.from_email){
+          providersSet.forEach(p => {
             if (p['dest'] == "ses") {
                 let userId = p['configId']
                 let configKey = p['dest'] + '-' + userId
                 if (!configsMap.get(configKey)) {
-                    this.processNotification(userId, event, sesTemplate, setting, p, destinationMap)
+                    this.processNotification(userId, event, sesTemplate, setting, p, emailMap)
                     configsMap.set(configKey, true)
                 }
             }
         });
-        return true
+        }
+      } catch (error) {
+        this.logger.error('getDefaultConfig', error)
+        throw new Error('Unable to get default SES config');
+      }
+    }
+
+    private preparePaylodAndSend(event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, p: string){
+          let sdk: NotifmeSdk = new NotifmeSdk({
+              channels: {
+                  email: {
+                      providers: [{
+                          type: 'ses',
+                          region: this.sesConfig['region'],
+                          accessKeyId: this.sesConfig['access_key'],
+                          secretAccessKey: this.sesConfig['secret_access_key'],
+                          //sessionToken: config['session_token'] // optional
+                      }]
+                  }
+              }
+          });
+
+          event.payload['fromEmail'] = this.sesConfig['from_email']
+          let engine = new Engine();
+          // let options = { allowUndefinedFacts: true }
+          let conditions: string = p['rule']['conditions'];
+          if (conditions) {
+              engine.addRule({conditions: conditions, event: event});
+              engine.run(event).then(e => {
+                  this.sendNotification(event, sdk, sesTemplate.template_payload).then(result => {
+                      this.saveNotificationEventSuccessLog(result, event, p, setting);
+                  }).catch((error) => {
+                      this.logger.error(error.message);
+                      this.saveNotificationEventFailureLog(event, p, setting);
+                  });
+              })
+          } else {
+              this.sendNotification(event, sdk, sesTemplate.template_payload).then(result => {
+                  this.saveNotificationEventSuccessLog(result, event, p, setting);
+              }).catch((error) => {
+                  this.logger.error(error.message);
+                  this.saveNotificationEventFailureLog(event, p, setting);
+              });
+          }
     }
 
     private processNotification(userId: number, event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, p: string, emailMap: Map<string, boolean>) {
@@ -60,47 +127,10 @@ export class SESService implements Handler {
             if (!emailMap.get(user['email_id'])) {
                 emailMap.set(user['email_id'], true)
                 event.payload['toEmail'] = user['email_id']
+                this.preparePaylodAndSend(event, sesTemplate, setting, p)
             } else {
                 this.logger.info('duplicate email filtered out')
                 return
-            }
-        })
-        this.sesConfigRepository.findDefaultSESConfig().then(config => {
-            let sdk: NotifmeSdk = new NotifmeSdk({
-                channels: {
-                    email: {
-                        providers: [{
-                            type: 'ses',
-                            region: config['region'],
-                            accessKeyId: config['access_key'],
-                            secretAccessKey: config['secret_access_key'],
-                            //sessionToken: config['session_token'] // optional
-                        }]
-                    }
-                }
-            });
-
-            event.payload['fromEmail'] = config['from_email']
-            let engine = new Engine();
-            // let options = { allowUndefinedFacts: true }
-            let conditions: string = p['rule']['conditions'];
-            if (conditions) {
-                engine.addRule({conditions: conditions, event: event});
-                engine.run(event).then(e => {
-                    this.sendNotification(event, sdk, sesTemplate.template_payload).then(result => {
-                        this.saveNotificationEventSuccessLog(result, event, p, setting);
-                    }).catch((error) => {
-                        this.logger.error(error.message);
-                        this.saveNotificationEventFailureLog(event, p, setting);
-                    });
-                })
-            } else {
-                this.sendNotification(event, sdk, sesTemplate.template_payload).then(result => {
-                    this.saveNotificationEventSuccessLog(result, event, p, setting);
-                }).catch((error) => {
-                    this.logger.error(error.message);
-                    this.saveNotificationEventFailureLog(event, p, setting);
-                });
             }
         })
     }
@@ -108,12 +138,13 @@ export class SESService implements Handler {
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
             let json = Mustache.render(template, event.payload)
-            json = JSON.parse(json)
             const res = await sdk.send(
                 {
-                    email: json
+                    email: JSON.parse(json)
                 }
             );
+            this.logger.info('Notification send')
+            this.logger.info(json)
             return res;
         } catch (error) {
             this.logger.error('ses sendNotification error', error)

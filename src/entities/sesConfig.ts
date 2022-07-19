@@ -29,4 +29,7 @@ export class SesConfig {
 
     @Column()
     default: string;
+
+    @Column()
+    deleted: boolean;
 }
