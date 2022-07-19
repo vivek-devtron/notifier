@@ -77,8 +77,6 @@ export class SMTPService implements Handler {
           // let options = { allowUndefinedFacts: true }
           let conditions: string = p['rule']['conditions'];
 
-          this.logger.info('smtpConfigRepository.preparePaylodAndSend()')
-          //this.logger.info(JSON.stringify(event))
           if (conditions) {
               engine.addRule({conditions: conditions, event: event});
               engine.run(event).then(e => {
@@ -106,8 +104,6 @@ export class SMTPService implements Handler {
                 this.logger.info(event.correlationId)
                 return
             }
-            this.logger.info('usersRepository.findByUserId')
-            this.logger.info(JSON.stringify(user))
             if (!emailMap.get(user['email_id'])) {
                 emailMap.set(user['email_id'], true)
                 event.payload['toEmail'] = user['email_id']
@@ -130,7 +126,6 @@ export class SMTPService implements Handler {
 
     private async getDefaultConfig(){
       try {
-        this.logger.info('getDefaultConfig')
         const config = await this.smtpConfigRepository.findDefaultSMTPConfig()
         this.smtpConfig = {
           port: config['port'],
@@ -147,8 +142,6 @@ export class SMTPService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-          this.logger.info('Notification send event payload')
-          this.logger.info(JSON.stringify(event.payload))
             let json = Mustache.render(template, event.payload)
             const res = await sdk.send(
                 {

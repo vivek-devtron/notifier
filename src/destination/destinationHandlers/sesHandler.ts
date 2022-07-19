@@ -123,7 +123,6 @@ export class SESService implements Handler {
 
     private async getDefaultConfig(){
       try {
-        this.logger.info('getDefaultConfig')
         const config = await this.sesConfigRepository.findDefaultSESConfig()
         this.sesConfig = {
           region: config['region'],
@@ -139,16 +138,12 @@ export class SESService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-
-          this.logger.info('Notification send event payload')
-          this.logger.info(JSON.stringify(event.payload))
             let json = Mustache.render(template, event.payload)
             const res = await sdk.send(
                 {
                     email: JSON.parse(json)
                 }
             );
-
             this.logger.info('Notification send')
             this.logger.info(json)
             return res;
