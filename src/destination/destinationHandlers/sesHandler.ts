@@ -97,9 +97,6 @@ export class SESService implements Handler {
           let engine = new Engine();
           // let options = { allowUndefinedFacts: true }
           let conditions: string = p['rule']['conditions'];
-          this.logger.info('preparePaylodAndSend')
-          this.logger.info(JSON.stringify(event))
-          this.logger.info('---------------------******************-----------------')
           if (conditions) {
               engine.addRule({conditions: conditions, event: event});
               engine.run(event).then(e => {
@@ -130,9 +127,6 @@ export class SESService implements Handler {
             if (!emailMap.get(user['email_id'])) {
                 emailMap.set(user['email_id'], true)
                 event.payload['toEmail'] = user['email_id']
-                this.logger.info('toEmail')
-                this.logger.info(user['email_id'])
-                this.logger.info(JSON.stringify(this.sesConfig))
                 this.preparePaylodAndSend(event, sesTemplate, setting, p)
             } else {
                 this.logger.info('duplicate email filtered out')
