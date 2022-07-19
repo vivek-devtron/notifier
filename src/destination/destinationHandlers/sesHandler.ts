@@ -42,17 +42,40 @@ export class SESService implements Handler {
         const providerObjects = setting.config
         const providersSet = new Set(providerObjects);
         this.sesConfig = null
-        providersSet.forEach(p => {
+        for (const element of providersSet) {
+          if (element['dest'] === "ses") {
+            this.getDefaultConfig(providersSet, event, sesTemplate, setting, destinationMap, configsMap)
+            break
+          }
+        }
+        return true
+    }
+
+    private async getDefaultConfig(providersSet, event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, emailMap: Map<string, boolean>, configsMap: Map<string, boolean> ){
+      try {
+        const config = await this.sesConfigRepository.findDefaultSESConfig()
+        this.sesConfig = {
+          region: config['region'],
+          access_key: config['access_key'],
+          secret_access_key: config['secret_access_key'],
+          from_email: config['from_email']
+        }
+        if(this.sesConfig && this.sesConfig.from_email){
+          providersSet.forEach(p => {
             if (p['dest'] == "ses") {
                 let userId = p['configId']
                 let configKey = p['dest'] + '-' + userId
                 if (!configsMap.get(configKey)) {
-                    this.processNotification(userId, event, sesTemplate, setting, p, destinationMap)
+                    this.processNotification(userId, event, sesTemplate, setting, p, emailMap)
                     configsMap.set(configKey, true)
                 }
             }
         });
-        return true
+        }
+      } catch (error) {
+        this.logger.error('getDefaultConfig', error)
+        throw new Error('Unable to get default SES config');
+      }
     }
 
     private preparePaylodAndSend(event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, p: string){
@@ -74,6 +97,9 @@ export class SESService implements Handler {
           let engine = new Engine();
           // let options = { allowUndefinedFacts: true }
           let conditions: string = p['rule']['conditions'];
+          this.logger.info('preparePaylodAndSend')
+          this.logger.info(JSON.stringify(event))
+          this.logger.info('---------------------******************-----------------')
           if (conditions) {
               engine.addRule({conditions: conditions, event: event});
               engine.run(event).then(e => {
@@ -104,36 +130,15 @@ export class SESService implements Handler {
             if (!emailMap.get(user['email_id'])) {
                 emailMap.set(user['email_id'], true)
                 event.payload['toEmail'] = user['email_id']
-                if(this.sesConfig && this.sesConfig.from_email){
-                  this.preparePaylodAndSend(event, sesTemplate, setting, p)
-                } else{
-                  this.getDefaultConfig().then(result => {
-                      this.preparePaylodAndSend(event, sesTemplate, setting, p)
-                  }).catch((error) => {
-                      this.logger.error(error.message);
-                      this.saveNotificationEventFailureLog(event, p, setting);
-                  });
-                }
+                this.logger.info('toEmail')
+                this.logger.info(user['email_id'])
+                this.logger.info(JSON.stringify(this.sesConfig))
+                this.preparePaylodAndSend(event, sesTemplate, setting, p)
             } else {
                 this.logger.info('duplicate email filtered out')
                 return
             }
         })
-    }
-
-    private async getDefaultConfig(){
-      try {
-        const config = await this.sesConfigRepository.findDefaultSESConfig()
-        this.sesConfig = {
-          region: config['region'],
-          access_key: config['access_key'],
-          secret_access_key: config['secret_access_key'],
-          from_email: config['from_email']
-        }
-      } catch (error) {
-        this.logger.error('getDefaultConfig', error)
-        throw new Error('Unable to get default SES config');
-      }
     }
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {

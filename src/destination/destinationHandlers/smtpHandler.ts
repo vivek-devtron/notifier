@@ -33,27 +33,51 @@ export class SMTPService implements Handler {
     }
 
     handle(event: Event, templates: NotificationTemplates[], setting: NotificationSettings, configsMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean {
-        let smtpTemplate: NotificationTemplates = templates.find(t => {
+        let sesTemplate: NotificationTemplates = templates.find(t => {
             return 'ses' == t.channel_type
         })
-        if (!smtpTemplate) {
+        if (!sesTemplate) {
             this.logger.info("no smtp template")
             return
         }
         const providerObjects = setting.config
         const providersSet = new Set(providerObjects);
         this.smtpConfig = null
-        providersSet.forEach(p => {
-            if (p['dest'] == "smtp") {
+        for (const element of providersSet) {
+          if (element['dest'] === "ses") {
+            this.getDefaultConfig(providersSet, event, sesTemplate, setting, destinationMap, configsMap)
+            break
+          }
+        }
+        return true
+    }
+
+    private async getDefaultConfig(providersSet, event: Event, sesTemplate: NotificationTemplates, setting: NotificationSettings, emailMap: Map<string, boolean>, configsMap: Map<string, boolean> ){
+      try {
+        const config = await this.smtpConfigRepository.findDefaultSMTPConfig()
+        this.smtpConfig = {
+          port: config['port'],
+          host: config['host'],
+          auth_user: config['auth_user'],
+          auth_password: config['auth_password'],
+          from_email: config['from_email']
+        }
+        if(this.smtpConfig && this.smtpConfig.from_email){
+          providersSet.forEach(p => {
+            if (p['dest'] == "ses") {
                 let userId = p['configId']
                 let configKey = p['dest'] + '-' + userId
                 if (!configsMap.get(configKey)) {
-                    this.processNotification(userId, event, smtpTemplate, setting, p, destinationMap)
+                    this.processNotification(userId, event, sesTemplate, setting, p, emailMap)
                     configsMap.set(configKey, true)
                 }
             }
         });
-        return true
+      }
+      } catch (error) {
+        this.logger.error('getDefaultConfig', error)
+        throw new Error('Unable to get default SMTP config');
+      }
     }
 
     private preparePaylodAndSend(event: Event, smtpTemplate: NotificationTemplates, setting: NotificationSettings, p: string){
@@ -107,37 +131,12 @@ export class SMTPService implements Handler {
             if (!emailMap.get(user['email_id'])) {
                 emailMap.set(user['email_id'], true)
                 event.payload['toEmail'] = user['email_id']
-                if(this.smtpConfig && this.smtpConfig.from_email){
-                  this.preparePaylodAndSend(event, smtpTemplate, setting, p)
-                } else{
-                  this.getDefaultConfig().then(result => {
-                      this.preparePaylodAndSend(event, smtpTemplate, setting, p)
-                  }).catch((error) => {
-                      this.logger.error(error.message);
-                      this.saveNotificationEventFailureLog(event, p, setting);
-                  });
-                }
+                this.preparePaylodAndSend(event, smtpTemplate, setting, p)
             } else {
                 this.logger.info('duplicate email filtered out')
                 return
             }
         })
-    }
-
-    private async getDefaultConfig(){
-      try {
-        const config = await this.smtpConfigRepository.findDefaultSMTPConfig()
-        this.smtpConfig = {
-          port: config['port'],
-          host: config['host'],
-          auth_user: config['auth_user'],
-          auth_password: config['auth_password'],
-          from_email: config['from_email']
-        }
-      } catch (error) {
-        this.logger.error('getDefaultConfig', error)
-        throw new Error('Unable to get default SMTP config');
-      }
     }
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
