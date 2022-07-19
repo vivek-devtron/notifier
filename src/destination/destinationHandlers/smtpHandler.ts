@@ -131,9 +131,9 @@ export class SMTPService implements Handler {
     private async getDefaultConfig(){
       try {
         this.logger.info('getDefaultConfig')
-        const config = this.smtpConfigRepository.findDefaultSMTPConfig()
+        const config = await this.smtpConfigRepository.findDefaultSMTPConfig()
         this.smtpConfig = {
-          port:config['port'],
+          port: config['port'],
           host: config['host'],
           auth_user: config['auth_user'],
           auth_password: config['auth_password'],
