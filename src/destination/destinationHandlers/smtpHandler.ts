@@ -8,6 +8,7 @@ import {NotificationSettings} from "../../entities/notificationSettings";
 import {NotificationTemplates} from "../../entities/notificationTemplates";
 import {UsersRepository} from "../../repository/usersRepository";
 import { SMTPConfigRepository } from '../../repository/smtpConfigRepository';
+import { MustacheHelper } from '../../common/mustacheHelper';
 
 //https://github.com/notifme/notifme-sdk/blob/master/src/models/notification-request.js#L132
 export class SMTPService implements Handler {
@@ -16,6 +17,7 @@ export class SMTPService implements Handler {
     smtpConfigRepository: SMTPConfigRepository
     usersRepository: UsersRepository
     logger: any
+    mh: MustacheHelper
     smtpConfig: {
         port: string
         host: string
@@ -24,12 +26,13 @@ export class SMTPService implements Handler {
         from_email: string
     }
 
-    constructor(eventLogRepository: EventLogRepository, eventLogBuilder: EventLogBuilder, smtpConfigRepository: SMTPConfigRepository, usersRepository: UsersRepository, logger: any) {
+    constructor(eventLogRepository: EventLogRepository, eventLogBuilder: EventLogBuilder, smtpConfigRepository: SMTPConfigRepository, usersRepository: UsersRepository, logger: any, mh: MustacheHelper) {
         this.eventLogRepository = eventLogRepository
         this.eventLogBuilder = eventLogBuilder
         this.smtpConfigRepository = smtpConfigRepository
         this.usersRepository = usersRepository
         this.logger = logger
+        this.mh = mh
     }
 
     handle(event: Event, templates: NotificationTemplates[], setting: NotificationSettings, configsMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean {
@@ -158,7 +161,11 @@ export class SMTPService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-            let json = Mustache.render(template, event.payload)
+            let parsedEvent = this.mh.parseEvent(event);
+            parsedEvent['fromEmail'] = event.payload['fromEmail'];
+            parsedEvent['toEmail'] = event.payload['toEmail'];
+
+            let json = Mustache.render(template, parsedEvent)
             const res = await sdk.send(
                 {
                     email: JSON.parse(json)

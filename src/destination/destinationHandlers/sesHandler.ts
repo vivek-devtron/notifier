@@ -8,6 +8,7 @@ import {NotificationSettings} from "../../entities/notificationSettings";
 import {NotificationTemplates} from "../../entities/notificationTemplates";
 import {SESConfigRepository} from "../../repository/sesConfigRepository";
 import {UsersRepository} from "../../repository/usersRepository";
+import { MustacheHelper } from '../../common/mustacheHelper';
 
 //https://github.com/notifme/notifme-sdk/blob/master/src/models/notification-request.js#L132
 
@@ -17,18 +18,20 @@ export class SESService implements Handler {
     sesConfigRepository: SESConfigRepository
     usersRepository: UsersRepository
     logger: any
+    mh: MustacheHelper
     sesConfig: {
         region: string
         access_key: string
         secret_access_key: string
         from_email: string
     }
-    constructor(eventLogRepository: EventLogRepository, eventLogBuilder: EventLogBuilder, sesConfigRepository: SESConfigRepository, usersRepository: UsersRepository, logger: any) {
+    constructor(eventLogRepository: EventLogRepository, eventLogBuilder: EventLogBuilder, sesConfigRepository: SESConfigRepository, usersRepository: UsersRepository, logger: any, mh: MustacheHelper) {
         this.eventLogRepository = eventLogRepository
         this.eventLogBuilder = eventLogBuilder
         this.sesConfigRepository = sesConfigRepository
         this.usersRepository = usersRepository
         this.logger = logger
+        this.mh = mh
     }
 
     handle(event: Event, templates: NotificationTemplates[], setting: NotificationSettings, configsMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean {
@@ -154,7 +157,11 @@ export class SESService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-            let json = Mustache.render(template, event.payload)
+            let parsedEvent = this.mh.parseEvent(event);
+            parsedEvent['fromEmail'] = event.payload['fromEmail'];
+            parsedEvent['toEmail'] = event.payload['toEmail'];
+
+            let json = Mustache.render(template, parsedEvent)
             const res = await sdk.send(
                 {
                     email: JSON.parse(json)
