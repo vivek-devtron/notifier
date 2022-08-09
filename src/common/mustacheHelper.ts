@@ -151,7 +151,7 @@ interface ParsedCIEvent {
         branch: string;
         commit: string
         commitLink: string;
-        isWebhookType: boolean;
+        webhookType: boolean;
         webhookData: WebhookData;
     }[];
     buildHistoryLink: string;
@@ -163,7 +163,7 @@ interface ParsedCDEvent {
     appName: string;
     pipelineName: string;
     envName: string;
-    stage: "Pre-deployment" | "Post-deplloyment" | "Deploy";
+    stage: "Pre-deployment" | "Post-deployment" | "Deployment";
     ciMaterials: {
         branch: string;
         commit: string
