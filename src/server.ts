@@ -47,8 +47,8 @@ let smtpConfigRepository: SMTPConfigRepository = new SMTPConfigRepository()
 let usersRepository: UsersRepository = new UsersRepository()
 let mustacheHelper: MustacheHelper = new MustacheHelper()
 let slackService = new SlackService(eventLogRepository, eventLogBuilder, slackConfigRepository, logger, mustacheHelper)
-let sesService = new SESService(eventLogRepository, eventLogBuilder, sesConfigRepository, usersRepository, logger)
-let smtpService = new SMTPService(eventLogRepository, eventLogBuilder, smtpConfigRepository, usersRepository, logger)
+let sesService = new SESService(eventLogRepository, eventLogBuilder, sesConfigRepository, usersRepository, logger, mustacheHelper)
+let smtpService = new SMTPService(eventLogRepository, eventLogBuilder, smtpConfigRepository, usersRepository, logger, mustacheHelper)
 
 let handlers: Handler[] = []
 handlers.push(slackService)
