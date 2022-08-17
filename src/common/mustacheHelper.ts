@@ -36,7 +36,7 @@ export class MustacheHelper {
 
     parseEvent(event: Event): ParsedCIEvent | ParsedCDEvent {
         let date = moment(event.eventTime);
-        let timestamp = date.format("dddd, MMMM Do YYYY HH:mm a");
+        let timestamp = date.utc(true).format("dddd, MMMM Do YYYY hh:mm A");
         let baseURL = event.baseUrl;
         let material = event.payload.material;
         let ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
