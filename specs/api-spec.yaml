@@ -95,25 +95,25 @@ components:
             $ref: '#/components/schemas/CiPipelineMaterialResponse'
     GitCommit:
       type: object
-        properties:
-          Commit:
-            type: string
-          Author:
-            type: string
-          Date:
-            type: string
-          Message:
-            type: string
-          WebhookData:
-            $ref: '#/components/schemas/WebhookData'
-          GitRepoUrl:
-            type: string
-          GitRepoName:
-            type: string
-          CiConfigureSourceType:
-            type: string
-          CiConfigureSourceValue:
-            type: string
+      properties:
+        Commit:
+          type: string
+        Author:
+          type: string
+        Date:
+          type: string
+        Message:
+          type: string
+        WebhookData:
+          $ref: '#/components/schemas/WebhookData'
+        GitRepoUrl:
+          type: string
+        GitRepoName:
+          type: string
+        CiConfigureSourceType:
+          type: string
+        CiConfigureSourceValue:
+          type: string
     WebhookData:
       type: object
       properties:
