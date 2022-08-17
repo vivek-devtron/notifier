@@ -34,9 +34,7 @@ export class MustacheHelper {
         return "NA"
     }
 
-    parseEvent(event: Event): ParsedCIEvent | ParsedCDEvent {
-        let date = moment(event.eventTime);
-        let timestamp = date.utc(true).format("dddd, MMMM Do YYYY hh:mm A");
+    parseEvent(event: Event, isSlackNotification?: boolean): ParsedCIEvent | ParsedCDEvent {
         let baseURL = event.baseUrl;
         let material = event.payload.material;
         let ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
@@ -72,12 +70,16 @@ export class MustacheHelper {
                 }
             }
         }) : [];
+
+
+        const date = moment(event.eventTime);
+        const timestamp = isSlackNotification ? date.unix() : date.utc(true).format("dddd, MMMM Do YYYY hh:mm A");
+
         if (event.pipelineType === "CI") {
             let buildHistoryLink;
             if (baseURL && event.payload.buildHistoryLink) buildHistoryLink = `${baseURL}${event.payload.buildHistoryLink}`;
             return {
                 eventTime: timestamp,
-                eventTimestamp: event.eventTimestamp || date.unix(),
                 triggeredBy: event.payload.triggeredBy || "NA",
                 appName: event.payload.appName || "NA",
                 pipelineName: event.payload.pipelineName || "NA",
@@ -95,7 +97,6 @@ export class MustacheHelper {
 
             return {
                 eventTime: timestamp,
-                eventTimestamp: event.eventTimestamp || date.unix(),
                 triggeredBy: event.payload.triggeredBy || "NA",
                 appName: event.payload.appName || "NA",
                 envName: event.payload.envName || "NA",
@@ -145,8 +146,7 @@ export class MustacheHelper {
 
 //For Slack
 interface ParsedCIEvent {
-    eventTime: string;
-    eventTimestamp: number;
+    eventTime: number | string;
     triggeredBy: string;
     appName: string;
     pipelineName: string;
@@ -161,8 +161,7 @@ interface ParsedCIEvent {
 }
 
 interface ParsedCDEvent {
-    eventTime: string;
-    eventTimestamp: number;
+    eventTime: number | string;
     triggeredBy: string;
     appName: string;
     pipelineName: string;

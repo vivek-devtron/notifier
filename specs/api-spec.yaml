@@ -1,0 +1,163 @@
+openapi: "3.0.3"
+info:
+  version: 1.0.0
+  title: Devtron Labs
+paths:
+  /notify:
+    post:
+      description: Receive notifcation request & send the notification to the respective recipients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+      responses:
+        "200":
+          description: notify response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        eventTypeId:
+          type: integer
+          description: Id referring to event type like CI/CD triggered (1), successful (2) or failure (3).
+          example: 1
+        pipelineId:
+          type: integer
+          description: Pipeline Id for which notifier event triggered
+          example: 200
+        pipelineType:
+          type: string
+          description: Type referring to pipeline type i.e. CI or CD
+          example: "CI"
+        correlationId:
+          anyOf:
+            - type: string
+            - type: number
+          description: A unique identifier value that is attached to a request
+        payload:
+          $ref: '#/components/schemas/Payload'
+        eventTime:
+          type: string
+          description: Time when event is triggered
+          example: "2022-08-17 08:16:20.158382+00"
+        appId:
+          type: integer
+        envId:
+          type: integer
+        teamId:
+          type: integer
+        baseUrl:
+          type: string
+    Payload:
+      type: object
+      properties:
+        appName:
+          type: string
+        envName:
+          type: string
+        pipelineName:
+          type: string
+        source:
+          type: string
+        dockerImageUrl:
+          type: string
+        triggeredBy:
+          type: string
+        stage:
+          type: string
+        deploymentHistoryLink:
+          type: string
+        appDetailsLink:
+          type: string
+        downloadLink:
+          type: string
+        buildHistoryLink:
+          type: string
+        material:
+          $ref: '#/components/schemas/MaterialTriggerInfo'
+    MaterialTriggerInfo:
+      type: object
+      properties:
+        gitTriggers:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/GitCommit'
+        ciMaterials:
+          type: array
+          items:
+            $ref: '#/components/schemas/CiPipelineMaterialResponse'
+    GitCommit:
+      type: object
+        properties:
+          Commit:
+            type: string
+          Author:
+            type: string
+          Date:
+            type: string
+          Message:
+            type: string
+          WebhookData:
+            $ref: '#/components/schemas/WebhookData'
+          GitRepoUrl:
+            type: string
+          GitRepoName:
+            type: string
+          CiConfigureSourceType:
+            type: string
+          CiConfigureSourceValue:
+            type: string
+    WebhookData:
+      type: object
+      properties:
+        id:
+          type: integer
+        eventActionType:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
+    CiPipelineMaterialResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        gitMaterialId:
+          type: integer
+        gitMaterialUrl:
+          type: string
+        gitMaterialName:
+          type: string
+        type:
+          type: string
+        value:
+          type: string
+        active:
+          type: boolean
+        lastFetchTime:
+          type: string
+        isRepoError:
+          type: boolean
+        repoErrorMsg:
+          type: string
+        isBranchError:
+          type: boolean
+        branchErrorMsg:
+          type: string
+        url:
+          type: string
+    Response:
+      anyOf:
+        - type: string
+        - type: number
+        - type: integer
+        - type: boolean
+        - type: object

@@ -77,7 +77,6 @@ class Event {
     correlationId?: number | string
     payload: any
     eventTime: string
-    eventTimestamp: number
     appId: number
     envId: number
     teamId: number

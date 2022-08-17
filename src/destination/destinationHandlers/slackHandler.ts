@@ -102,7 +102,7 @@ export class SlackService implements Handler {
 
     public async sendNotification(event: Event, sdk: NotifmeSdk, template: string) {
         try {
-            let parsedEvent = this.mh.parseEvent(event as Event);
+            let parsedEvent = this.mh.parseEvent(event as Event, true);
             let jsons = Mustache.render(template, parsedEvent);
             let j = JSON.parse(jsons)
             const res = await sdk.send(
