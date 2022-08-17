@@ -74,7 +74,7 @@ class Event {
     eventTypeId: number
     pipelineId: number
     pipelineType: string
-    correlationId?: number | string;
+    correlationId?: number | string
     payload: any
     eventTime: string
     appId: number
