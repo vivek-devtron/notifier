@@ -4,6 +4,8 @@
     "pipelineId": 32,
     "pipelineType": "CD",
     "correlationId": "1bfb4b38-764a-49a3-8334-f44e2c1ef540",
+    "eventTime": "2022-08-17 05:08:35.158382+00",
+    "eventTimestamp": 1660638673,
     "payload": {
         "appName": "viki-app-9",
         "envName": "dev",
@@ -59,7 +61,6 @@
             ]
         }
     },
-    "eventTime": "2020-06-14T06:15:25Z",
     "teamId": 1,
     "appId": 47,
     "envId": 2,
