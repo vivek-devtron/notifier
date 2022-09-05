@@ -73,7 +73,9 @@ export class MustacheHelper {
 
 
         const date = moment(event.eventTime);
-        const timestamp = isSlackNotification ? date.unix() : date.utc(true).format("dddd, MMMM Do YYYY hh:mm A");
+        const timestamp = isSlackNotification
+            ? date.unix()
+            : date.format('dddd, MMMM Do YYYY hh:mm A [GMT]Z');
 
         if (event.pipelineType === "CI") {
             let buildHistoryLink;
