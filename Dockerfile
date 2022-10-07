@@ -8,7 +8,7 @@ COPY /.  .
 RUN  yarn build-ts
 
 
-FROM node:14.2.0
+FROM node:14
 
 ENV TINI_VERSION v0.18.0
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
