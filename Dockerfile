@@ -11,7 +11,7 @@ RUN  yarn build-ts
 FROM node:14
 
 ENV TINI_VERSION v0.18.0
-ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-arm64 /tini
 RUN chmod +x /tini
 ENTRYPOINT ["/tini", "--"]
 
