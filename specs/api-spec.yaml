@@ -82,6 +82,8 @@ components:
           type: string
         material:
           $ref: '#/components/schemas/MaterialTriggerInfo'
+        failedStepName:
+          type: string
     MaterialTriggerInfo:
       type: object
       properties:
