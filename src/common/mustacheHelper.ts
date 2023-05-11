@@ -80,7 +80,7 @@ export class MustacheHelper {
         if (event.pipelineType === "CI") {
             let buildHistoryLink;
             if (baseURL && event.payload.buildHistoryLink) buildHistoryLink = `${baseURL}${event.payload.buildHistoryLink}`;
-            var parsedEvent:ParsedCIEvent = {
+            const parsedEvent:ParsedCIEvent = {
                 eventTime: timestamp,
                 triggeredBy: event.payload.triggeredBy || "NA",
                 appName: event.payload.appName || "NA",
