@@ -87,8 +87,8 @@ export class MustacheHelper {
                 pipelineName: event.payload.pipelineName || "NA",
                 ciMaterials: ciMaterials,
                 buildHistoryLink: buildHistoryLink,
-                failedStepName: event.payload.failedStepName || "NA",
-                isStepFailed: event.payload.failedStepName != ""
+                failureReason: event.payload.failureReason || "NA",
+                failureReasonExists: event.payload.failedStepName != ""
             }
         }
         else if (event.pipelineType === "CD") {
@@ -162,8 +162,8 @@ interface ParsedCIEvent {
         webhookData: WebhookData;
     }[];
     buildHistoryLink: string;
-    failedStepName: string;
-    isStepFailed: boolean;
+    failureReason: string;
+    failureReasonExists: boolean;
 }
 
 interface ParsedCDEvent {

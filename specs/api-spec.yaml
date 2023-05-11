@@ -82,7 +82,7 @@ components:
           type: string
         material:
           $ref: '#/components/schemas/MaterialTriggerInfo'
-        failedStepName:
+        failureReason:
           type: string
     MaterialTriggerInfo:
       type: object
