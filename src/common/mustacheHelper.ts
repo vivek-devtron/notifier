@@ -80,7 +80,7 @@ export class MustacheHelper {
         if (event.pipelineType === "CI") {
             let buildHistoryLink;
             if (baseURL && event.payload.buildHistoryLink) buildHistoryLink = `${baseURL}${event.payload.buildHistoryLink}`;
-            return {
+            const parsedEvent:ParsedCIEvent = {
                 eventTime: timestamp,
                 triggeredBy: event.payload.triggeredBy || "NA",
                 appName: event.payload.appName || "NA",
@@ -88,6 +88,10 @@ export class MustacheHelper {
                 ciMaterials: ciMaterials,
                 buildHistoryLink: buildHistoryLink
             }
+            if(event.payload.failureReason) {
+                parsedEvent.failureReason = event.payload.failureReason
+            }
+            return parsedEvent
         }
         else if (event.pipelineType === "CD") {
             let appDetailsLink, deploymentHistoryLink;
@@ -160,6 +164,7 @@ interface ParsedCIEvent {
         webhookData: WebhookData;
     }[];
     buildHistoryLink: string;
+    failureReason?: string;
 }
 
 interface ParsedCDEvent {
