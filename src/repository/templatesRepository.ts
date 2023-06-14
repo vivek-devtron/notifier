@@ -1,5 +1,6 @@
 import {getManager} from "typeorm";
 import {NotificationTemplates} from "../entities/notificationTemplates";
+import { WebhookConfig } from "../entities/webhookconfig";
 
 export class NotificationTemplatesRepository {
 
@@ -12,3 +13,12 @@ export class NotificationTemplatesRepository {
         });
     }
 }
+export class WebhookConfigRepository {
+    async getAllWebhookConfigs() {
+      const webhookConfigs = await getManager()
+        .getRepository(WebhookConfig)
+        .find();
+  
+      return webhookConfigs;
+    }
+  }

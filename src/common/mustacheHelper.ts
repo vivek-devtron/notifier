@@ -115,6 +115,27 @@ export class MustacheHelper {
             }
         }
     }
+    parseEventForWebhook(event: Event ) :WebhookParsedEvent {
+        let eventType: string;
+        if (event.eventTypeId === 1) {
+          eventType = "trigger";
+        } else if (event.eventTypeId === 2) {
+          eventType = "success";
+        } else {
+          eventType = "fail";
+        }
+        return {
+          eventType: eventType,
+          devtronAppId: event.appId,
+          devtronEnvId: event.envId,
+          devtronAppName: event.payload.appName,
+          devtronEnvName: event.payload.envName,
+          devtronCdPipelineId: event.pipelineId,
+          devtronCiPipelineId: event.pipelineId,
+          devtronTriggeredByEmail: event.payload.triggeredBy,
+          devtronContainerImageTag: event.payload.dockerImageUrl,
+        };
+    }
 
     modifyWebhookData (webhookDataMap: any, gitUrl : string, isMergedTypeWebhook : boolean) : any {
 
@@ -165,6 +186,18 @@ interface ParsedCIEvent {
     }[];
     buildHistoryLink: string;
     failureReason?: string;
+}
+interface WebhookParsedEvent{
+    eventType?:string;
+    devtronAppId?:number;
+    devtronEnvId?:number;
+    devtronAppName?:string;
+    devtronEnvName?:string;
+    devtronCdPipelineId?:number;
+    devtronCiPipelineId?:number;
+    devtronApprovedByEmail?:string;
+    devtronTriggeredByEmail:string;
+    devtronContainerImageTag?:string;
 }
 
 interface ParsedCDEvent {
