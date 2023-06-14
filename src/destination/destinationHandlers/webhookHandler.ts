@@ -1,4 +1,3 @@
-import NotifmeSdk from 'notifme-sdk'
 import {Event, Handler} from '../../notification/service/notificationService';
 import Mustache from 'mustache';
 import Engine from 'json-rules-engine'
@@ -49,6 +48,15 @@ export class WebhookService implements Handler{
 
     }
 
+    private webhookNotificationConfig(event: Event, webhookTemplate: WebhookConfig, setting: NotificationSettings, p: string) {
+        this.sendNotification(event, webhookTemplate.web_hook_url, JSON.stringify(webhookTemplate.payload),webhookTemplate.header).then(result => {
+            this.saveNotificationEventSuccessLog(result, event, p, setting);
+        }).catch((error) => {
+            this.logger.error(error.message);
+            this.saveNotificationEventFailureLog(event, p, setting);
+        });
+    }
+
     private processNotification(webhookConfigId: number, event: Event, webhookTemplate: WebhookConfig, setting: NotificationSettings, p: string, webhookMap: Map<string, boolean>) {
         this.webhookConfigRepository.findByWebhookConfigId(webhookConfigId).then(config => {
             if (!config) {
@@ -68,20 +76,10 @@ export class WebhookService implements Handler{
             if (conditions) {
                 engine.addRule({conditions: conditions, event: event});
                 engine.run(event).then(e => {
-                    this.sendNotification(event, webhookTemplate.web_hook_url, JSON.stringify(webhookTemplate.payload),webhookTemplate.header).then(result => {
-                        this.saveNotificationEventSuccessLog(result, event, p, setting);
-                    }).catch((error) => {
-                        this.logger.error(error.message);
-                        this.saveNotificationEventFailureLog(event, p, setting);
-                    });
+                    this.webhookNotificationConfig(event, webhookTemplate, setting, p);
                 })
             } else {
-                this.sendNotification(event, webhookTemplate.web_hook_url, JSON.stringify(webhookTemplate.payload),webhookTemplate.header).then(result => {
-                    this.saveNotificationEventSuccessLog(result, event, p, setting);
-                }).catch((error) => {
-                    this.logger.error(error.message);
-                    this.saveNotificationEventFailureLog(event, p, setting);
-                });
+                this.webhookNotificationConfig(event, webhookTemplate, setting, p);
             }
         })
     }
