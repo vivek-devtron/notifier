@@ -48,7 +48,7 @@ export class WebhookService implements Handler{
 
     }
 
-    private webhookNotificationConfig(event: Event, webhookTemplate: WebhookConfig, setting: NotificationSettings, p: string) {
+    private sendAndLogNotification(event: Event, webhookTemplate: WebhookConfig, setting: NotificationSettings, p: string) {
         this.sendNotification(event, webhookTemplate.web_hook_url, JSON.stringify(webhookTemplate.payload),webhookTemplate.header).then(result => {
             this.saveNotificationEventSuccessLog(result, event, p, setting);
         }).catch((error) => {
@@ -76,10 +76,10 @@ export class WebhookService implements Handler{
             if (conditions) {
                 engine.addRule({conditions: conditions, event: event});
                 engine.run(event).then(e => {
-                    this.webhookNotificationConfig(event, webhookTemplate, setting, p);
+                    this.sendAndLogNotification(event, webhookTemplate, setting, p);
                 })
             } else {
-                this.webhookNotificationConfig(event, webhookTemplate, setting, p);
+                this.sendAndLogNotification(event, webhookTemplate, setting, p);
             }
         })
     }
