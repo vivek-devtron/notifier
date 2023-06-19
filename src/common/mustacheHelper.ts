@@ -196,7 +196,7 @@ interface WebhookParsedEvent{
     devtronEnvName?:string;
     devtronCdPipelineId?:number;
     devtronCiPipelineId?:number;
-    devtronApprovedByEmail?:string;
+    devtronApprovedByEmail?:string[];
     devtronTriggeredByEmail:string;
     devtronContainerImageTag?:string;
 }
