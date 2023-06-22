@@ -24,6 +24,9 @@ import { UsersRepository } from './repository/usersRepository';
 import { Users } from "./entities/users";
 import { send } from './tests/sendSlackNotification';
 import { MustacheHelper } from './common/mustacheHelper';
+import { WebhookConfigRepository } from './repository/webhookConfigRepository';
+import { WebhookService } from './destination/destinationHandlers/webhookHandler';
+import { WebhookConfig } from './entities/webhookconfig';
 const app = express();
 app.use(express.json());
 
@@ -42,16 +45,19 @@ let logger = winston.createLogger({
 let eventLogRepository: EventLogRepository = new EventLogRepository()
 let eventLogBuilder: EventLogBuilder = new EventLogBuilder()
 let slackConfigRepository: SlackConfigRepository = new SlackConfigRepository()
+let webhookConfigRepository:WebhookConfigRepository = new WebhookConfigRepository()
 let sesConfigRepository: SESConfigRepository = new SESConfigRepository()
 let smtpConfigRepository: SMTPConfigRepository = new SMTPConfigRepository()
 let usersRepository: UsersRepository = new UsersRepository()
 let mustacheHelper: MustacheHelper = new MustacheHelper()
 let slackService = new SlackService(eventLogRepository, eventLogBuilder, slackConfigRepository, logger, mustacheHelper)
+let webhookService = new WebhookService(eventLogRepository, eventLogBuilder, webhookConfigRepository, logger, mustacheHelper)
 let sesService = new SESService(eventLogRepository, eventLogBuilder, sesConfigRepository, usersRepository, logger, mustacheHelper)
 let smtpService = new SMTPService(eventLogRepository, eventLogBuilder, smtpConfigRepository, usersRepository, logger, mustacheHelper)
 
 let handlers: Handler[] = []
 handlers.push(slackService)
+handlers.push(webhookService)
 handlers.push(sesService)
 handlers.push(smtpService)
 
@@ -74,7 +80,7 @@ let dbOptions: ConnectionOptions = {
     username: user,
     password: pwd,
     database: db,
-    entities: [NotificationSettings, NotifierEventLog, Event, NotificationTemplates, SlackConfig, SesConfig, SMTPConfig, Users]
+    entities: [NotificationSettings, NotifierEventLog, Event, NotificationTemplates, SlackConfig, SesConfig, SMTPConfig, WebhookConfig, Users]
 }
 
 createConnection(dbOptions).then(async connection => {
