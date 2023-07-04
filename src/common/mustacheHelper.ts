@@ -124,6 +124,8 @@ export class MustacheHelper {
         } else {
           eventType = "fail";
         }
+        let index = -1;
+            if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.indexOf(":");
         return {
           eventType: eventType,
           devtronAppId: event.appId,
@@ -133,7 +135,7 @@ export class MustacheHelper {
           devtronCdPipelineId: event.pipelineId,
           devtronCiPipelineId: event.pipelineId,
           devtronTriggeredByEmail: event.payload.triggeredBy,
-          devtronContainerImageTag: event.payload.dockerImageUrl,
+          devtronContainerImageTag:index >= 0 ? event.payload.dockerImageUrl.substring(index + 1) : "NA",
           devtronApprovedByEmail: event.payload.approvedByEmail,
         };
     }
