@@ -125,7 +125,7 @@ export class MustacheHelper {
           eventType = "fail";
         }
         let index = -1;
-            if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.indexOf(":");
+            if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.lastIndexOf(":");
         return {
           eventType: eventType,
           devtronAppId: event.appId,
