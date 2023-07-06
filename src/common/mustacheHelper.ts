@@ -124,8 +124,13 @@ export class MustacheHelper {
         } else {
           eventType = "fail";
         }
-        let index = -1;
-            if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.lastIndexOf(":");
+        let devtronContainerImageTag='NA' ,devtronContainerImageRepo='NA';
+            if (event.payload.dockerImageUrl){
+                const index = event.payload.dockerImageUrl.lastIndexOf(":");
+                devtronContainerImageTag=event.payload.dockerImageUrl.substring(index + 1) ;
+                devtronContainerImageRepo=event.payload.dockerImageUrl.substring(0,index);
+            } 
+
         return {
           eventType: eventType,
           devtronAppId: event.appId,
@@ -135,8 +140,8 @@ export class MustacheHelper {
           devtronCdPipelineId: event.pipelineId,
           devtronCiPipelineId: event.pipelineId,
           devtronTriggeredByEmail: event.payload.triggeredBy,
-          devtronContainerImageTag:index >= 0 ? event.payload.dockerImageUrl.substring(index + 1) : "NA",
-          devtronContainerImageRepo:index >= 0 ? event.payload.dockerImageUrl.substring(0,index) : "NA",
+          devtronContainerImageTag:devtronContainerImageTag,
+          devtronContainerImageRepo:devtronContainerImageRepo,
           devtronApprovedByEmail: event.payload.approvedByEmail,
         };
     }
