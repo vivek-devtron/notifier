@@ -35,7 +35,7 @@ export class WebhookService implements Handler{
         const providersSet = new Set(providerObjects);
 
         providersSet.forEach(p => {
-            if (p['dest'] == "webhook") {
+            if (p['dest'] == "webhook" && p['configId']==webhookTemplate.id) {
                 let webhookConfigId = p['configId']
                 let configKey = p['dest'] + '-' + webhookConfigId
                 if (!configsMap.get(configKey)) {
