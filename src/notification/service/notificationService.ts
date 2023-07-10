@@ -79,23 +79,25 @@ class NotificationService {
               
                   if (webhookConfig.length) {
                     const webhookConfigRepository = new WebhookConfigRepository();
+                    var configIds = new Array<number>()
                     webhookConfig.forEach(config => {
-                        
-                        webhookConfigRepository.getAllWebhookConfigs().then((templateResults: WebhookConfig[]) => {
-                            const newTemplateResult = templateResults.filter((t) => t.id === config.configId);
-                    
-                            if (newTemplateResult.length === 0) {
-                              this.logger.info("no templates found for event ", event);
-                              return;
-                            }
-                    
-                            for (const h of this.handlers) {
-                              if (h instanceof WebhookService) {
-                                h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
-                              }
-                            }
-                          });
+                       configIds.push(config.configId)
                     });
+                        
+                    webhookConfigRepository.getAllWebhookConfigs().then((templateResults: WebhookConfig[]) => {
+                        const newTemplateResult = templateResults.filter((t) => configIds.includes(t.id));
+                
+                        if (newTemplateResult.length === 0) {
+                            this.logger.info("no templates found for event ", event);
+                            return;
+                        }
+                
+                        for (const h of this.handlers) {
+                            if (h instanceof WebhookService) {
+                            h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
+                            }
+                        }
+                        });
                     
                 }
                 if (configArray.length>webhookConfig.length){
