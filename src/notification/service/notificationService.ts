@@ -76,8 +76,7 @@ class NotificationService {
                               }
                             }
                           });
-                    });
-                    
+                    });   
                 }
                 if (configArray.length>webhookConfig.length){
                     this.templatesRepository.findByEventTypeIdAndNodeType(event.eventTypeId, event.pipelineType).then((templateResults:NotificationTemplates[]) => {
@@ -90,10 +89,8 @@ class NotificationService {
                         }
                     })
                 }
-               }
-            
+            }
             });
-        
         }).catch(err => this.logger.error("err" + err))
     }
 
