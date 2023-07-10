@@ -70,28 +70,35 @@ class NotificationService {
                 //      }
                 //     });
                 //   }
-                const configArray = JSON.parse(setting.config);
+                // if (typeof setting.config === Object){
+
+                // }
+                const configArray =  setting.config as any;
                 if (Array.isArray(configArray)) {
-                  const webhookConfig = configArray.find((config) => config.dest === 'webhook');
+                  const webhookConfig = configArray.filter((config) => config.dest === 'webhook');
               
-                  if (webhookConfig) {
+                  if (webhookConfig.length) {
                     const webhookConfigRepository = new WebhookConfigRepository();
-                    webhookConfigRepository.getAllWebhookConfigs().then((templateResults: WebhookConfig[]) => {
-                      const newTemplateResult = templateResults.filter((t) => t.id === webhookConfig.configId);
-              
-                      if (newTemplateResult.length === 0) {
-                        this.logger.info("no templates found for event ", event);
-                        return;
-                      }
-              
-                      for (const h of this.handlers) {
-                        if (h instanceof WebhookService) {
-                          h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
-                        }
-                      }
+                    webhookConfig.forEach(config => {
+                        
+                        webhookConfigRepository.getAllWebhookConfigs().then((templateResults: WebhookConfig[]) => {
+                            const newTemplateResult = templateResults.filter((t) => t.id === config.configId);
+                    
+                            if (newTemplateResult.length === 0) {
+                              this.logger.info("no templates found for event ", event);
+                              return;
+                            }
+                    
+                            for (const h of this.handlers) {
+                              if (h instanceof WebhookService) {
+                                h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
+                              }
+                            }
+                          });
                     });
+                    
                 }
-                  else{
+                if (configArray.length>webhookConfig.length){
                     this.templatesRepository.findByEventTypeIdAndNodeType(event.eventTypeId, event.pipelineType).then((templateResults:NotificationTemplates[]) => {
                         if (!templateResults) {
                             this.logger.info("no templates found for event ", event);
@@ -102,7 +109,7 @@ class NotificationService {
                         }
                     })
                 }
-                }
+               }
             
             });
         
