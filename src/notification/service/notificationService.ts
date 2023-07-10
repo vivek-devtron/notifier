@@ -54,23 +54,44 @@ class NotificationService {
             });
             
             settingsResults.forEach((setting) => {
-                if (setting.config[0]["dest"]===('webhook')) {
+                // if (setting.config[0]["dest"]===('webhook')) {
+                //     const webhookConfigRepository = new WebhookConfigRepository();
+                //     webhookConfigRepository.getAllWebhookConfigs().then((templateResults: WebhookConfig[]) => {
+                //         let newTemplateResult = templateResults.filter(t=>t.id===setting.config[0]['configId'])
+                //       if (!newTemplateResult) {
+                //         this.logger.info("no templates found for event ", event);
+                //         return;
+                //       }
+                //       for (let h of this.handlers) {
+                //         if (h instanceof WebhookService){
+                //             h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
+                //         }
+                        
+                //      }
+                //     });
+                //   }
+                const configArray = JSON.parse(setting.config);
+                if (Array.isArray(configArray)) {
+                  const webhookConfig = configArray.find((config) => config.dest === 'webhook');
+              
+                  if (webhookConfig) {
                     const webhookConfigRepository = new WebhookConfigRepository();
                     webhookConfigRepository.getAllWebhookConfigs().then((templateResults: WebhookConfig[]) => {
-                        let newTemplateResult = templateResults.filter(t=>t.id===setting.config[0]['configId'])
-                      if (!newTemplateResult) {
+                      const newTemplateResult = templateResults.filter((t) => t.id === webhookConfig.configId);
+              
+                      if (newTemplateResult.length === 0) {
                         this.logger.info("no templates found for event ", event);
                         return;
                       }
-                      for (let h of this.handlers) {
-                        if (h instanceof WebhookService){
-                            h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
+              
+                      for (const h of this.handlers) {
+                        if (h instanceof WebhookService) {
+                          h.handle(event, newTemplateResult, setting, configsMap, destinationMap);
                         }
-                        
-                     }
+                      }
                     });
-                  }
-                else{
+                }
+                  else{
                     this.templatesRepository.findByEventTypeIdAndNodeType(event.eventTypeId, event.pipelineType).then((templateResults:NotificationTemplates[]) => {
                         if (!templateResults) {
                             this.logger.info("no templates found for event ", event);
@@ -80,10 +101,11 @@ class NotificationService {
                             h.handle(event, templateResults, setting, configsMap, destinationMap)
                         }
                     })
-
+                }
                 }
             
             });
+        
         }).catch(err => this.logger.error("err" + err))
     }
 
