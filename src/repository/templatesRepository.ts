@@ -12,6 +12,14 @@ export class NotificationTemplatesRepository {
             }
         });
     }
+    findByEventTypeId(eventTypeId: number) {
+      return getManager().getRepository(NotificationTemplates).find({
+          where: {
+              event_type_id: eventTypeId,
+             
+          }
+      });
+  }
 }
 export class WebhookConfigRepository {
     async getAllWebhookConfigs() {
