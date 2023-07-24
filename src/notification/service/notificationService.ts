@@ -6,6 +6,8 @@ import {NotificationSettings} from "../../entities/notificationSettings";
 import { WebhookConfig } from "../../entities/webhookconfig";
 import { settings } from "cluster";
 import { WebhookService } from "../../destination/destinationHandlers/webhookHandler";
+import { SESService } from "../../destination/destinationHandlers/sesHandler";
+import { SMTPService } from "../../destination/destinationHandlers/smtpHandler";
 
 export interface Handler {
     handle(event: Event, templates: (NotificationTemplates[] | WebhookConfig[]), setting: NotificationSettings, configMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean
@@ -56,8 +58,11 @@ class NotificationService {
                         settings.config = event.payload.providers
                         settings.pipeline_id = event.pipelineId
                         settings.event_type_id = event.eventTypeId
+                        
                         for (let h of this.handlers) {
+                            if ((h instanceof SESService) || (h instanceof SMTPService)){
                             h.handle(event, templateResults, settings, configsMap, destinationMap)
+                            }
                         }
                     })
 
