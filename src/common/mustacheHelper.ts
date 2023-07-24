@@ -123,7 +123,7 @@ export class MustacheHelper {
             if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.lastIndexOf(":");
             if (event.payload.imageTagNames) imageTagNames = event.payload.imageTagNames;
             if (event.payload.imageComment) imageComment = event.payload.imageComment;
-            if (event.payload.imageLink) imageLink = event.payload.imageLink;
+            if (baseURL && event.payload.imageApprovalLink) imageLink =`${baseURL}${event.payload.imageApprovalLink}`;
            
             return {
                 eventTime: timestamp,
@@ -134,7 +134,7 @@ export class MustacheHelper {
                 imageTag: index >= 0 ? event.payload.dockerImageUrl.substring(index + 1) : "NA",
                 comment:imageComment,
                 tags:imageTagNames,
-                imageLink:imageLink,
+                imageApprovalLink:imageLink,
             }
             
 
@@ -255,7 +255,7 @@ interface ParsedCDEvent {
     envName: string;
     imageTagNames?:string[];
     imageComment?:string;
-    imageLink?:string;
+    imageApprovalLink?:string;
     stage: "Pre-deployment" | "Post-deployment" | "Deployment";
     ciMaterials: {
         branch: string;
