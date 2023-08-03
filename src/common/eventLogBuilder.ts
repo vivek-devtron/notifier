@@ -11,7 +11,7 @@ export class EventLogBuilder {
         let notifierEventLog = {
             destination: destination,
             source_id: setting.pipeline_id,
-            pipeline_type: setting.pipeline_type,
+            pipeline_type: setting.pipeline_type ? setting.pipeline_type : "NA", //This is optional as approval event doesn't have pipeline_type
             event_type_id: setting.event_type_id,
             correlation_id: event.correlationId,
             payload: event.payload,

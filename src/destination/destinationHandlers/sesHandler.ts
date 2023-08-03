@@ -160,8 +160,16 @@ export class SESService implements Handler {
             let parsedEvent = this.mh.parseEvent(event);
             parsedEvent['fromEmail'] = event.payload['fromEmail'];
             parsedEvent['toEmail'] = event.payload['toEmail'];
-
-            let json = Mustache.render(template, parsedEvent)
+            let json: string
+            if(event.eventTypeId===4){
+                let commentDisplayStyle = (event.payload.imageComment === "") ? 'none' : 'inline';
+                let tagDisplayStyle = (event.payload.imageTagNames === null) ? 'none' : 'inline';
+                json = Mustache.render(template, { ...parsedEvent, commentDisplayStyle ,tagDisplayStyle});
+            }else{
+                json = Mustache.render(template, parsedEvent)
+            }
+           
+            
             const res = await sdk.send(
                 {
                     email: JSON.parse(json)

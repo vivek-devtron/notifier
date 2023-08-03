@@ -6,6 +6,8 @@ import {NotificationSettings} from "../../entities/notificationSettings";
 import { WebhookConfig } from "../../entities/webhookconfig";
 import { settings } from "cluster";
 import { WebhookService } from "../../destination/destinationHandlers/webhookHandler";
+import { SESService } from "../../destination/destinationHandlers/sesHandler";
+import { SMTPService } from "../../destination/destinationHandlers/smtpHandler";
 
 export interface Handler {
     handle(event: Event, templates: (NotificationTemplates[] | WebhookConfig[]), setting: NotificationSettings, configMap: Map<string, boolean>, destinationMap: Map<string, boolean>): boolean
@@ -27,9 +29,51 @@ class NotificationService {
         this.templatesRepository = templatesRepository
         this.logger = logger
     }
+    public sendApprovalNotificaton(event:Event){
+        if (!this.isValidEventForApproval(event)) {
+            return
+        }
+        this.logger.info('notificationSettingsRepository.findByEventSource')
+          if (!event.payload.providers || event.payload.providers == 0) {
+                this.logger.info("no notification settings found for event " + event.correlationId);
+                return
+            }
+            let destinationMap = new Map();
+            let configsMap = new Map();
+            this.logger.info("notification settings " );
+            this.logger.info(JSON.stringify(event.payload.providers))
+            event.payload.providers.forEach((setting) => {
+                const providerObjects = setting
+                    let id = providerObjects['dest'] + '-' + providerObjects['configId']
+                    configsMap.set(id, false)
+            });
+            
+
+                    this.templatesRepository.findByEventTypeId(event.eventTypeId).then((templateResults:NotificationTemplates[]) => {
+                        if (!templateResults) {
+                            this.logger.info("no templates found for event ", event);
+                            return
+                        }
+                        let settings = new NotificationSettings()
+                        settings.config = event.payload.providers
+                        settings.pipeline_id = event.pipelineId
+                        settings.event_type_id = event.eventTypeId
+                        
+                        for (let h of this.handlers) {
+                            if ((h instanceof SESService) || (h instanceof SMTPService)){
+                            h.handle(event, templateResults, settings, configsMap, destinationMap)
+                            }
+                        }
+                    })
+
+    }
 
     public sendNotification(event: Event) {
 
+    if (event.payload.providers){
+            this.sendApprovalNotificaton(event)
+            return
+        }
         if (!this.isValidEvent(event)) {
             return
         }
@@ -78,7 +122,7 @@ class NotificationService {
                           });
                     });   
                 }
-                if (configArray.length>webhookConfig.length){
+                if (configArray.length > webhookConfig.length){
                     this.templatesRepository.findByEventTypeIdAndNodeType(event.eventTypeId, event.pipelineType).then((templateResults:NotificationTemplates[]) => {
                         if (!templateResults) {
                             this.logger.info("no templates found for event ", event);
@@ -99,12 +143,17 @@ class NotificationService {
             return true;
         return false;
     }
+    private isValidEventForApproval(event: Event) {
+        if (event.eventTypeId && event.correlationId && event.payload && event.baseUrl)
+            return true;
+        return false;
+    }
 }
 
 class Event {
     eventTypeId: number
     pipelineId: number
-    pipelineType: string
+    pipelineType?: string
     correlationId?: number | string
     payload: any
     eventTime: string

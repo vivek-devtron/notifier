@@ -34,10 +34,12 @@ export class MustacheHelper {
         return "NA"
     }
 
-    parseEvent(event: Event, isSlackNotification?: boolean): ParsedCIEvent | ParsedCDEvent {
+    parseEvent(event: Event, isSlackNotification?: boolean): ParsedCIEvent | ParsedCDEvent | ParseApprovalEvent{
         let baseURL = event.baseUrl;
         let material = event.payload.material;
-        let ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
+        let ciMaterials;
+        if (event.eventTypeId!==4){
+        ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
             if (material && material.gitTriggers && material.gitTriggers[ci.id]) {
                 let trigger = material.gitTriggers[ci.id];
                 let _material;
@@ -70,6 +72,7 @@ export class MustacheHelper {
                 }
             }
         }) : [];
+    }
 
 
         const date = moment(event.eventTime);
@@ -113,6 +116,28 @@ export class MustacheHelper {
                 appDetailsLink: appDetailsLink,
                 deploymentHistoryLink: deploymentHistoryLink,
             }
+        }
+        else if (event.eventTypeId===4){
+            let  imageTagNames,imageComment,imageLink;
+            let index = -1;
+            if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.lastIndexOf(":");
+            if (event.payload.imageTagNames) imageTagNames = event.payload.imageTagNames;
+            if (event.payload.imageComment) imageComment = event.payload.imageComment;
+            if (baseURL && event.payload.imageApprovalLink) imageLink =`${baseURL}${event.payload.imageApprovalLink}`;
+           
+            return {
+                eventTime: timestamp,
+                triggeredBy: event.payload.triggeredBy || "NA",
+                appName: event.payload.appName || "NA",
+                envName: event.payload.envName || "NA",
+                pipelineName: event.payload.pipelineName || "NA",
+                imageTag: index >= 0 ? event.payload.dockerImageUrl.substring(index + 1) : "NA",
+                comment:imageComment,
+                tags:imageTagNames,
+                imageApprovalLink:imageLink,
+            }
+            
+
         }
     }
     parseEventForWebhook(event: Event ) :WebhookParsedEvent {
@@ -209,6 +234,18 @@ interface WebhookParsedEvent{
     devtronContainerImageTag?:string;
     devtronContainerImageRepo?:string;
 }
+interface ParseApprovalEvent{
+    eventTime: number | string;
+    triggeredBy: string;
+    appName: string;
+    pipelineName: string;
+    envName: string;
+    tags?:string[];
+    comment?:string;
+    imageLink?:string;
+    imageTag: string;
+
+}
 
 interface ParsedCDEvent {
     eventTime: number | string;
@@ -216,6 +253,9 @@ interface ParsedCDEvent {
     appName: string;
     pipelineName: string;
     envName: string;
+    imageTagNames?:string[];
+    imageComment?:string;
+    imageApprovalLink?:string;
     stage: "Pre-deployment" | "Post-deployment" | "Deployment";
     ciMaterials: {
         branch: string;
