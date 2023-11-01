@@ -34,11 +34,11 @@ export class MustacheHelper {
         return "NA"
     }
 
-    parseEvent(event: Event, isSlackNotification?: boolean): ParsedCIEvent | ParsedCDEvent | ParseApprovalEvent{
+    parseEvent(event: Event, isSlackNotification?: boolean): ParsedCIEvent | ParsedCDEvent | ParseApprovalEvent | ParseConfigApprovalEvent{
         let baseURL = event.baseUrl;
         let material = event.payload.material;
         let ciMaterials;
-        if (event.eventTypeId!==4){
+        if (event.eventTypeId!==4 && event.eventTypeId!==5){
         ciMaterials = material.ciMaterials ? material.ciMaterials.map((ci) => {
             if (material && material.gitTriggers && material.gitTriggers[ci.id]) {
                 let trigger = material.gitTriggers[ci.id];
@@ -135,6 +135,28 @@ export class MustacheHelper {
                 comment:imageComment,
                 tags:imageTagNames,
                 imageApprovalLink:imageLink,
+            }
+            
+
+        }
+        else if (event.eventTypeId===5){
+            let  protectConfigFileType,protectConfigFileName,protectConfigComment,protectConfigLink,envName;
+            if (event.payload.protectConfigFileType) protectConfigFileType = event.payload.protectConfigFileType;
+            if (event.payload.protectConfigFileName) protectConfigFileName = event.payload.protectConfigFileName;
+            if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment;
+            if (baseURL && event.payload.imageApprovalLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
+           if (!event.payload.envName){
+            envName=event.payload.protectConfigFileType
+           }
+            return {
+                eventTime: timestamp,
+                triggeredBy: event.payload.triggeredBy || "NA",
+                appName: event.payload.appName || "NA",
+                envName: event.payload.envName || envName,
+                protectConfigFileType:protectConfigFileType || "NA",
+                protectConfigFileName:protectConfigFileName || "NA",
+                protectConfigComment:protectConfigComment || "NA",
+                protectConfigLink:protectConfigLink,
             }
             
 
@@ -246,6 +268,17 @@ interface ParseApprovalEvent{
     imageTag: string;
 
 }
+interface ParseConfigApprovalEvent{
+    eventTime: number | string;
+    triggeredBy: string;
+    appName: string;
+    envName: string;
+    protectConfigComment?:string;
+    protectConfigFileType:string;
+    protectConfigFileName:string;
+    protectConfigLink?:string;
+}
+
 
 interface ParsedCDEvent {
     eventTime: number | string;
