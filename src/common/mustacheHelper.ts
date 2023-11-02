@@ -144,7 +144,7 @@ export class MustacheHelper {
             if (event.payload.protectConfigFileType) protectConfigFileType = event.payload.protectConfigFileType;
             if (event.payload.protectConfigFileName) protectConfigFileName = event.payload.protectConfigFileName;
             if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment;
-            if (baseURL && event.payload.imageApprovalLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
+            if (baseURL && event.payload.protectConfigLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
            if (!event.payload.envName){
             envName=event.payload.protectConfigFileType
            }
