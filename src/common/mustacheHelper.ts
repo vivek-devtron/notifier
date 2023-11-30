@@ -146,7 +146,7 @@ export class MustacheHelper {
             if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment;
             if (baseURL && event.payload.protectConfigLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
            if (!event.payload.envName){
-            envName=event.payload.protectConfigFileType
+            envName="Base configuration"
            }
             return {
                 eventTime: timestamp,
