@@ -143,7 +143,7 @@ export class MustacheHelper {
             let  protectConfigFileType,protectConfigFileName,protectConfigComment,protectConfigLink,envName;
             if (event.payload.protectConfigFileType) protectConfigFileType = event.payload.protectConfigFileType;
             if (event.payload.protectConfigFileName) protectConfigFileName = event.payload.protectConfigFileName;
-            if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment;
+            if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment.split("\n");
             if (baseURL && event.payload.protectConfigLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
            if (!event.payload.envName){
             envName="Base configuration"
@@ -155,7 +155,7 @@ export class MustacheHelper {
                 envName: event.payload.envName || envName,
                 protectConfigFileType:protectConfigFileType || "NA",
                 protectConfigFileName:protectConfigFileName || "NA",
-                protectConfigComment:protectConfigComment || "NA",
+                protectConfigComment:protectConfigComment || [],
                 protectConfigLink:protectConfigLink,
             }
             
@@ -273,7 +273,7 @@ interface ParseConfigApprovalEvent{
     triggeredBy: string;
     appName: string;
     envName: string;
-    protectConfigComment?:string;
+    protectConfigComment?:string[];
     protectConfigFileType:string;
     protectConfigFileName:string;
     protectConfigLink?:string;
