@@ -69,8 +69,7 @@ class NotificationService {
     }
 
     public sendNotification(event: Event) {
-
-    if (event.payload.providers){
+        if (event.payload.providers){
             this.sendApprovalNotificaton(event)
             return
         }
