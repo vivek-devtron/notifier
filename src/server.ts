@@ -76,11 +76,11 @@ const db: string = process.env.DB;
 
 let dbOptions: ConnectionOptions = {
     type: "postgres",
-    host: "localhost",
-    port: 32080,
-    username: "postgres",
-    password: "4OKWVH3WrF7HQHlGuvYoK0oOtew8JJLz",
-    database: "orchestrator",
+    host: dbHost,
+    port: dbPort,
+    username: user,
+    password: pwd,
+    database: db,
     entities: [NotificationSettings, NotifierEventLog, Event, NotificationTemplates, SlackConfig, SesConfig, SMTPConfig, WebhookConfig, Users]
 }
 
