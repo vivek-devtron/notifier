@@ -27,6 +27,7 @@ import { MustacheHelper } from './common/mustacheHelper';
 import { WebhookConfigRepository } from './repository/webhookConfigRepository';
 import { WebhookService } from './destination/destinationHandlers/webhookHandler';
 import { WebhookConfig } from './entities/webhookconfig';
+import * as process from "process";
 const app = express();
 app.use(express.json());
 
@@ -113,4 +114,16 @@ app.post('/notify', (req, res) => {
     res.send('notifications sent')
 });
 
+process.on('SIGTERM', shutDown);
+process.on('SIGINT', shutDown);
+
 app.listen(3000, () => logger.info('Notifier app listening on port 3000!'))
+
+function shutDown(){
+    //shutdown gracefully
+    getManager().connection.close().then(async => logger.info("closed db connection before exiting")).catch(error => {
+        logger.error("failed to close db connection with error : ",error)
+        process.exit(1)
+    })
+    process.exit(0)
+}
