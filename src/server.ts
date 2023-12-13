@@ -1,7 +1,7 @@
 import express from 'express';
 import { NotificationService, Event, Handler } from './notification/service/notificationService'
 import "reflect-metadata"
-import { ConnectionOptions, createConnection, getConnectionOptions } from "typeorm"
+import {ConnectionOptions, createConnection, getConnectionOptions, getManager} from "typeorm"
 import { NotificationSettingsRepository } from "./repository/notificationSettingsRepository"
 import { SlackService } from './destination/destinationHandlers/slackHandler'
 import { SESService } from './destination/destinationHandlers/sesHandler'
@@ -75,11 +75,11 @@ const db: string = process.env.DB;
 
 let dbOptions: ConnectionOptions = {
     type: "postgres",
-    host: dbHost,
-    port: dbPort,
-    username: user,
-    password: pwd,
-    database: db,
+    host: "localhost",
+    port: 32080,
+    username: "postgres",
+    password: "4OKWVH3WrF7HQHlGuvYoK0oOtew8JJLz",
+    database: "orchestrator",
     entities: [NotificationSettings, NotifierEventLog, Event, NotificationTemplates, SlackConfig, SesConfig, SMTPConfig, WebhookConfig, Users]
 }
 
@@ -87,10 +87,22 @@ createConnection(dbOptions).then(async connection => {
     logger.info("Connected to DB")
 }).catch(error => {
     logger.error("TypeORM connection error: ", error);
+    logger.error("shutting down notifier due to un-successful database connection...")
+    process.exit(1)
 });
 
 app.get('/', (req, res) => res.send('Welcome to notifier Notifier!'))
-app.get('/health', (req, res) => res.send({ "status": "OK", "time": new Date() }))
+app.get('/health', (req, res) =>{
+    // check all the dependencies health checks
+    // currently only checking database connection
+    getManager().connection.query("SELECT 1").then(async => {
+        res.sendStatus(200)
+    }).catch(error => {
+        logger.error("health check with db failed with error : ",error)
+        res.sendStatus(500)
+    })
+})
+
 app.get('/test', (req, res) => {
     send();
     res.send('Test!');

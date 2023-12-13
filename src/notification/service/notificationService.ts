@@ -69,13 +69,13 @@ class NotificationService {
     }
 
     public sendNotification(event: Event) {
-        if (event.payload.providers){
-            this.sendApprovalNotificaton(event)
-            return
-        }
-        if (!this.isValidEvent(event)) {
-            return
-        }
+        // if (event.payload.providers){
+        //     this.sendApprovalNotificaton(event)
+        //     return
+        // }
+        // if (!this.isValidEvent(event)) {
+        //     return
+        // }
 
         this.notificationSettingsRepository.findByEventSource(event.pipelineType, event.pipelineId, event.eventTypeId, event.appId, event.envId, event.teamId).then((settingsResults) => {
           this.logger.info('notificationSettingsRepository.findByEventSource')
