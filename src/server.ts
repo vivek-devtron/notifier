@@ -93,14 +93,15 @@ createConnection(dbOptions).then(async connection => {
 });
 
 app.get('/', (req, res) => res.send('Welcome to notifier Notifier!'))
+
 app.get('/health', (req, res) =>{
     // check all the dependencies health checks
     // currently only checking database connection
     getManager().connection.query("SELECT 1").then(async => {
-        res.sendStatus(200)
+        res.status(200).send("healthy")
     }).catch(error => {
         logger.error("health check with db failed with error : ",error)
-        res.sendStatus(500)
+        res.status(500).send("unhealthy")
     })
 })
 
@@ -108,22 +109,11 @@ app.get('/test', (req, res) => {
     send();
     res.send('Test!');
 })
+
 app.post('/notify', (req, res) => {
     logger.info("notifications Received")
     notificationService.sendNotification(req.body)
     res.send('notifications sent')
 });
 
-process.on('SIGTERM', shutDown);
-process.on('SIGINT', shutDown);
-
 app.listen(3000, () => logger.info('Notifier app listening on port 3000!'))
-
-function shutDown(){
-    //shutdown gracefully
-    getManager().connection.close().then(async => logger.info("closed db connection before exiting")).catch(error => {
-        logger.error("failed to close db connection with error : ",error)
-        process.exit(1)
-    })
-    process.exit(0)
-}
