@@ -33,7 +33,7 @@
         "json-rules-engine": "^2.3.6",
         "moment-timezone": "^0.5.31",
         "mustache": "^3.0.1",
-        "notifme-sdk-updated": "^1.12.2",
+        "notifme-sdk-updated": "^1.12.3",
         "pg": "^8.2.1",
         "reflect-metadata": "^0.1.13",
         "typeorm": "^0.3.17",
