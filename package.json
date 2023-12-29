@@ -16,7 +16,7 @@
     "author": "devtron labs",
     "license": "UNLICENSED",
     "devDependencies": {
-        "node-fetch": "^2.6.0",
+        "node-fetch": "^2.6.8",
         "nodemon": "^1.19.4",
         "ts-node": "^8.10.2",
         "tslint": "^5.16.0",
