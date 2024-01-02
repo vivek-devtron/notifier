@@ -8,7 +8,7 @@ export class SESConfigRepository {
     }
 
     findDefaultSESConfig() {
-        return getManager().getRepository(SesConfig).findOne({where: {default: true, deleted: false}});
+        return getManager().getRepository(SesConfig).findOne({where: {default: 'true', deleted: false}});
     }
 
 }
