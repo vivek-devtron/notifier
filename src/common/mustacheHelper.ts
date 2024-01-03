@@ -135,6 +135,7 @@ export class MustacheHelper {
                 comment:imageComment,
                 tags:imageTagNames,
                 imageApprovalLink:imageLink,
+                approvalLink:event.payload.approvalLink,
             }
             
 
@@ -157,6 +158,7 @@ export class MustacheHelper {
                 protectConfigFileName:protectConfigFileName || "NA",
                 protectConfigComment:protectConfigComment || [],
                 protectConfigLink:protectConfigLink,
+                approvalLink:event.payload.approvalLink,
             }
             
 
@@ -266,6 +268,7 @@ interface ParseApprovalEvent{
     comment?:string;
     imageLink?:string;
     imageTag: string;
+    approvalLink?:string;
 
 }
 interface ParseConfigApprovalEvent{
@@ -277,6 +280,7 @@ interface ParseConfigApprovalEvent{
     protectConfigFileType:string;
     protectConfigFileName:string;
     protectConfigLink?:string;
+    approvalLink?:string;
 }
 
 
