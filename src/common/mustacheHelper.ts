@@ -118,12 +118,13 @@ export class MustacheHelper {
             }
         }
         else if (event.eventTypeId===4){
-            let  imageTagNames,imageComment,imageLink;
+            let  imageTagNames,imageComment,imageLink,approvalLink;
             let index = -1;
             if (event.payload.dockerImageUrl) index = event.payload.dockerImageUrl.lastIndexOf(":");
             if (event.payload.imageTagNames) imageTagNames = event.payload.imageTagNames;
             if (event.payload.imageComment) imageComment = event.payload.imageComment;
             if (baseURL && event.payload.imageApprovalLink) imageLink =`${baseURL}${event.payload.imageApprovalLink}`;
+            if (baseURL && event.payload.protectConfigLink) approvalLink = `${baseURL}${event.payload.approvalLink}`;
            
             return {
                 eventTime: timestamp,
@@ -135,17 +136,18 @@ export class MustacheHelper {
                 comment:imageComment,
                 tags:imageTagNames,
                 imageApprovalLink:imageLink,
-                approvalLink:event.payload.approvalLink,
+                approvalLink:approvalLink,
             }
             
 
         }
         else if (event.eventTypeId===5){
-            let  protectConfigFileType,protectConfigFileName,protectConfigComment,protectConfigLink,envName;
+            let  protectConfigFileType,protectConfigFileName,protectConfigComment,protectConfigLink,envName,approvalLink;
             if (event.payload.protectConfigFileType) protectConfigFileType = event.payload.protectConfigFileType;
             if (event.payload.protectConfigFileName) protectConfigFileName = event.payload.protectConfigFileName;
             if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment.split("\n");
             if (baseURL && event.payload.protectConfigLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
+            if (baseURL && event.payload.protectConfigLink) approvalLink = `${baseURL}${event.payload.approvalLink}`;
            if (!event.payload.envName){
             envName="Base configuration"
            }
@@ -158,7 +160,7 @@ export class MustacheHelper {
                 protectConfigFileName:protectConfigFileName || "NA",
                 protectConfigComment:protectConfigComment || [],
                 protectConfigLink:protectConfigLink,
-                approvalLink:event.payload.approvalLink,
+                approvalLink:approvalLink,
             }
             
 
