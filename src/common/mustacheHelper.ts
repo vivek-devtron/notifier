@@ -124,7 +124,7 @@ export class MustacheHelper {
             if (event.payload.imageTagNames) imageTagNames = event.payload.imageTagNames;
             if (event.payload.imageComment) imageComment = event.payload.imageComment;
             if (baseURL && event.payload.imageApprovalLink) imageLink =`${baseURL}${event.payload.imageApprovalLink}`;
-            if (baseURL && event.payload.protectConfigLink) approvalLink = `${baseURL}${event.payload.approvalLink}`;
+            if (baseURL && event.payload.approvalLink) approvalLink = `${baseURL}${event.payload.approvalLink}`;
            
             return {
                 eventTime: timestamp,
@@ -147,7 +147,7 @@ export class MustacheHelper {
             if (event.payload.protectConfigFileName) protectConfigFileName = event.payload.protectConfigFileName;
             if (event.payload.protectConfigComment) protectConfigComment = event.payload.protectConfigComment.split("\n");
             if (baseURL && event.payload.protectConfigLink) protectConfigLink =`${baseURL}${event.payload.protectConfigLink}`;
-            if (baseURL && event.payload.protectConfigLink) approvalLink = `${baseURL}${event.payload.approvalLink}`;
+            if (baseURL && event.payload.approvalLink) approvalLink = `${baseURL}${event.payload.approvalLink}`;
            if (!event.payload.envName){
             envName="Base configuration"
            }
@@ -284,7 +284,7 @@ interface ParseConfigApprovalEvent{
     protectConfigLink?:string;
     approvalLink?:string;
 }
-
+ 
 
 interface ParsedCDEvent {
     eventTime: number | string;
