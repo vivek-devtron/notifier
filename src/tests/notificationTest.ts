@@ -1,4 +1,4 @@
-import NotifmeSdk from 'notifme-sdk'
+import NotifmeSdk from 'notifme-sdk-updated'
 import { response } from 'express';
 
 
