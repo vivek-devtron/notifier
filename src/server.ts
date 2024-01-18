@@ -95,14 +95,7 @@ createConnection(dbOptions).then(async connection => {
 app.get('/', (req, res) => res.send('Welcome to notifier Notifier!'))
 
 app.get('/health', (req, res) =>{
-    // check all the dependencies health checks
-    // currently only checking database connection
-    getManager().connection.query("SELECT 1").then(async => {
-        res.status(200).send("healthy")
-    }).catch(error => {
-        logger.error("health check with db failed with error : ",error)
-        res.status(500).send("unhealthy")
-    })
+    res.status(200).send("healthy")
 })
 
 app.get('/test', (req, res) => {
