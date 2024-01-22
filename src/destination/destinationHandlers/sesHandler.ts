@@ -165,7 +165,7 @@ export class SESService implements Handler {
                 let commentDisplayStyle = (event.payload.imageComment === "") ? 'none' : 'inline';
                 let tagDisplayStyle = (event.payload.imageTagNames === null) ? 'none' : 'inline';
                 json = Mustache.render(template, { ...parsedEvent, commentDisplayStyle ,tagDisplayStyle});
-            }if(event.eventTypeId===5){
+            }else if(event.eventTypeId===5){
                 let commentDisplayStyle = (event.payload.protectConfigComment === "") ? 'none' : 'inline';
                 json = Mustache.render(template, { ...parsedEvent, commentDisplayStyle });
             }else{
